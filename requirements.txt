@@ -24,3 +24,12 @@ rich
 questionary
 langchain_anthropic
 langchain-google-genai
+
+# New dependencies for crypto and MCP support
+aiohttp
+fastmcp
+uvicorn
+textblob
+python-dotenv
+ccxt
+binance-python

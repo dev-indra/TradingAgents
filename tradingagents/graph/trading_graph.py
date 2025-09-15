@@ -58,7 +58,27 @@ class TradingAgentsGraph:
         )
 
         # Initialize LLMs
-        if self.config["llm_provider"].lower() == "openai" or self.config["llm_provider"] == "ollama" or self.config["llm_provider"] == "openrouter":
+        if self.config["llm_provider"].lower() == "openrouter":
+            # OpenRouter requires OpenAI API key environment variable
+            api_key = os.getenv("OPENROUTER_API_KEY")
+            if not api_key:
+                raise ValueError("OPENROUTER_API_KEY environment variable is required for OpenRouter")
+            
+            self.deep_thinking_llm = ChatOpenAI(
+                model=self.config["deep_think_llm"], 
+                base_url=self.config["backend_url"],
+                api_key=api_key,
+                extra_headers={"HTTP-Referer": "https://github.com/TauricResearch/TradingAgents"},
+                temperature=0.7
+            )
+            self.quick_thinking_llm = ChatOpenAI(
+                model=self.config["quick_think_llm"], 
+                base_url=self.config["backend_url"],
+                api_key=api_key,
+                extra_headers={"HTTP-Referer": "https://github.com/TauricResearch/TradingAgents"},
+                temperature=0.3
+            )
+        elif self.config["llm_provider"].lower() == "openai":
             self.deep_thinking_llm = ChatOpenAI(model=self.config["deep_think_llm"], base_url=self.config["backend_url"])
             self.quick_thinking_llm = ChatOpenAI(model=self.config["quick_think_llm"], base_url=self.config["backend_url"])
         elif self.config["llm_provider"].lower() == "anthropic":
@@ -111,6 +131,43 @@ class TradingAgentsGraph:
 
     def _create_tool_nodes(self) -> Dict[str, ToolNode]:
         """Create tool nodes for different data sources."""
+        if self.config["trading_mode"] == "crypto":
+            return self._create_crypto_tool_nodes()
+        else:
+            return self._create_stock_tool_nodes()
+    
+    def _create_crypto_tool_nodes(self) -> Dict[str, ToolNode]:
+        """Create tool nodes for cryptocurrency data sources."""
+        tools = []
+        
+        # Add MCP-based crypto tools if enabled
+        if self.config.get("use_mcp_servers", True):
+            tools.extend([
+                self.toolkit.get_crypto_price_data_mcp,
+                self.toolkit.get_crypto_market_data_mcp,
+                self.toolkit.get_crypto_orderbook_mcp,
+                self.toolkit.calculate_crypto_indicators_mcp,
+                self.toolkit.get_crypto_news_mcp,
+                self.toolkit.get_crypto_social_sentiment_mcp,
+                self.toolkit.get_market_fear_greed_index_mcp,
+            ])
+        
+        # Add fallback tools
+        tools.extend([
+            self.toolkit.get_crypto_data_coingecko,
+            self.toolkit.get_crypto_data_binance,
+            self.toolkit.get_crypto_news_rss,
+        ])
+        
+        return {
+            "market": ToolNode(tools),
+            "social": ToolNode(tools),
+            "news": ToolNode(tools),
+            "fundamentals": ToolNode(tools),
+        }
+    
+    def _create_stock_tool_nodes(self) -> Dict[str, ToolNode]:
+        """Create tool nodes for stock data sources (legacy)."""
         return {
             "market": ToolNode(
                 [

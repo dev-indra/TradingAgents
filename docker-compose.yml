@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  tradingagents:
+    build: .
+    container_name: tradingagents-main
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - COINMARKETCAP_API_KEY=${COINMARKETCAP_API_KEY}
+      - COINGECKO_API_KEY=${COINGECKO_API_KEY}
+      - BINANCE_API_KEY=${BINANCE_API_KEY}
+      - BINANCE_SECRET_KEY=${BINANCE_SECRET_KEY}
+      - TRADINGAGENTS_RESULTS_DIR=/app/results
+      - TRADINGAGENTS_DATA_DIR=/app/data
+      - MCP_CRYPTO_SERVER_URL=http://mcp-crypto:9000
+      - MCP_NEWS_SERVER_URL=http://mcp-news:9001
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./results:/app/results
+      - ./data:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      - redis
+      - mcp-crypto
+      - mcp-news
+    networks:
+      - tradingagents-network
+    restart: unless-stopped
+
+  # MCP Server for Crypto Data
+  mcp-crypto:
+    build:
+      context: .
+      dockerfile: mcp/crypto/Dockerfile
+    container_name: mcp-crypto-server
+    ports:
+      - "9000:9000"
+    environment:
+      - COINMARKETCAP_API_KEY=${COINMARKETCAP_API_KEY}
+      - COINGECKO_API_KEY=${COINGECKO_API_KEY}
+      - BINANCE_API_KEY=${BINANCE_API_KEY}
+      - BINANCE_SECRET_KEY=${BINANCE_SECRET_KEY}
+    networks:
+      - tradingagents-network
+    restart: unless-stopped
+
+  # MCP Server for News and Sentiment
+  mcp-news:
+    build:
+      context: .
+      dockerfile: mcp/news/Dockerfile
+    container_name: mcp-news-server
+    ports:
+      - "9001:9001"
+    environment:
+      - NEWS_API_KEY=${NEWS_API_KEY}
+      - REDDIT_CLIENT_ID=${REDDIT_CLIENT_ID}
+      - REDDIT_CLIENT_SECRET=${REDDIT_CLIENT_SECRET}
+    networks:
+      - tradingagents-network
+    restart: unless-stopped
+
+  # Redis for caching and state management
+  redis:
+    image: redis:7-alpine
+    container_name: tradingagents-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - tradingagents-network
+    restart: unless-stopped
+
+  # Web interface (optional)
+  web-ui:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    container_name: tradingagents-web
+    ports:
+      - "3000:3000"
+    environment:
+      - TRADINGAGENTS_API_URL=http://tradingagents:8000
+    depends_on:
+      - tradingagents
+    networks:
+      - tradingagents-network
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+
+networks:
+  tradingagents-network:
+    driver: bridge

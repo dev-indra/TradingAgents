@@ -13,6 +13,16 @@ from langchain_openai import ChatOpenAI
 import tradingagents.dataflows.interface as interface
 from tradingagents.default_config import DEFAULT_CONFIG
 from langchain_core.messages import HumanMessage
+from tradingagents.agents.utils.crypto_mcp_tools import (
+    get_crypto_price_data_mcp_sync,
+    get_crypto_market_data_mcp_sync,
+    get_crypto_orderbook_mcp_sync,
+    calculate_crypto_indicators_mcp_sync,
+    get_crypto_news_mcp_sync,
+    get_crypto_social_sentiment_mcp_sync,
+    get_market_fear_greed_index_mcp_sync,
+    analyze_crypto_news_sentiment_mcp_sync
+)
 
 
 def create_msg_delete():
@@ -417,3 +427,169 @@ class Toolkit:
         )
 
         return openai_fundamentals_results
+
+    # Crypto MCP Tools
+    @tool
+    def get_crypto_price_data_mcp(
+        self,
+        symbol: Annotated[str, "Cryptocurrency symbol (e.g., BTC, ETH)"],
+        days: Annotated[int, "Number of days of historical data"] = 30,
+    ) -> str:
+        """
+        Get historical price data for a cryptocurrency via MCP server
+        
+        Args:
+            symbol: Cryptocurrency symbol (e.g., BTC, ETH)
+            days: Number of days of historical data (default: 30)
+        
+        Returns:
+            JSON string containing price data, market caps, and volumes
+        """
+        return get_crypto_price_data_mcp_sync(symbol, days, self.config)
+
+    @tool
+    def get_crypto_market_data_mcp(
+        self,
+        symbol: Annotated[str, "Cryptocurrency symbol (e.g., BTC, ETH)"],
+    ) -> str:
+        """
+        Get current market data for a cryptocurrency via MCP server
+        
+        Args:
+            symbol: Cryptocurrency symbol (e.g., BTC, ETH)
+        
+        Returns:
+            JSON string containing current price, market cap, volume, and other metrics
+        """
+        return get_crypto_market_data_mcp_sync(symbol, self.config)
+
+    @tool
+    def get_crypto_orderbook_mcp(
+        self,
+        symbol: Annotated[str, "Cryptocurrency symbol (e.g., BTC, ETH)"],
+    ) -> str:
+        """
+        Get order book data for a cryptocurrency via MCP server
+        
+        Args:
+            symbol: Cryptocurrency symbol (e.g., BTC, ETH)
+        
+        Returns:
+            JSON string containing bid/ask data
+        """
+        return get_crypto_orderbook_mcp_sync(symbol, self.config)
+
+    @tool
+    def calculate_crypto_indicators_mcp(
+        self,
+        symbol: Annotated[str, "Cryptocurrency symbol (e.g., BTC, ETH)"],
+        days: Annotated[int, "Number of days for calculation"] = 30,
+    ) -> str:
+        """
+        Calculate technical indicators for a cryptocurrency via MCP server
+        
+        Args:
+            symbol: Cryptocurrency symbol (e.g., BTC, ETH)
+            days: Number of days for calculation (default: 30)
+        
+        Returns:
+            JSON string containing calculated technical indicators
+        """
+        return calculate_crypto_indicators_mcp_sync(symbol, days, self.config)
+
+    @tool
+    def get_crypto_news_mcp(
+        self,
+        symbol: Annotated[str, "Cryptocurrency symbol (e.g., BTC, ETH)"],
+        days: Annotated[int, "Number of days back to search"] = 7,
+    ) -> str:
+        """
+        Get news articles related to a cryptocurrency via MCP server
+        
+        Args:
+            symbol: Cryptocurrency symbol (e.g., BTC, ETH)
+            days: Number of days back to search (default: 7)
+        
+        Returns:
+            JSON string containing news articles with sentiment analysis
+        """
+        return get_crypto_news_mcp_sync(symbol, days, self.config)
+
+    @tool
+    def get_crypto_social_sentiment_mcp(
+        self,
+        symbol: Annotated[str, "Cryptocurrency symbol (e.g., BTC, ETH)"],
+    ) -> str:
+        """
+        Get social media sentiment for a cryptocurrency via MCP server
+        
+        Args:
+            symbol: Cryptocurrency symbol (e.g., BTC, ETH)
+        
+        Returns:
+            JSON string containing aggregated social sentiment data
+        """
+        return get_crypto_social_sentiment_mcp_sync(symbol, self.config)
+
+    @tool
+    def get_market_fear_greed_index_mcp(self) -> str:
+        """
+        Get the current crypto Fear & Greed index via MCP server
+        
+        Returns:
+            JSON string containing Fear & Greed index value and interpretation
+        """
+        return get_market_fear_greed_index_mcp_sync(self.config)
+
+    @tool
+    def analyze_crypto_news_sentiment_mcp(
+        self,
+        symbol: Annotated[str, "Cryptocurrency symbol (e.g., BTC, ETH)"],
+        days: Annotated[int, "Number of days back to analyze"] = 7,
+    ) -> str:
+        """
+        Get comprehensive sentiment analysis combining news and social data via MCP server
+        
+        Args:
+            symbol: Cryptocurrency symbol (e.g., BTC, ETH)
+            days: Number of days back to analyze (default: 7)
+        
+        Returns:
+            JSON string containing comprehensive sentiment analysis
+        """
+        return analyze_crypto_news_sentiment_mcp_sync(symbol, days, self.config)
+
+    # Fallback crypto tools (direct API calls)
+    @tool
+    def get_crypto_data_coingecko(
+        self,
+        symbol: Annotated[str, "Cryptocurrency symbol (e.g., BTC, ETH)"],
+        days: Annotated[int, "Number of days of data"] = 30,
+    ) -> str:
+        """
+        Fallback: Get crypto data directly from CoinGecko API
+        """
+        # This would be implemented as a direct API call fallback
+        return f"CoinGecko data for {symbol} - {days} days (fallback implementation needed)"
+
+    @tool
+    def get_crypto_data_binance(
+        self,
+        symbol: Annotated[str, "Cryptocurrency symbol (e.g., BTC, ETH)"],
+    ) -> str:
+        """
+        Fallback: Get crypto data directly from Binance API
+        """
+        # This would be implemented as a direct API call fallback
+        return f"Binance data for {symbol} (fallback implementation needed)"
+
+    @tool
+    def get_crypto_news_rss(
+        self,
+        symbol: Annotated[str, "Cryptocurrency symbol (e.g., BTC, ETH)"],
+    ) -> str:
+        """
+        Fallback: Get crypto news from RSS feeds
+        """
+        # This would be implemented as RSS feed parsing fallback
+        return f"RSS news for {symbol} (fallback implementation needed)"
