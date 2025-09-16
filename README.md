@@ -1,206 +1,365 @@
-<p align="center">
-  <img src="assets/TauricResearch.png" style="width: 60%; height: auto;">
-</p>
-
-<div align="center" style="line-height: 1;">
-  <a href="https://arxiv.org/abs/2412.20138" target="_blank"><img alt="arXiv" src="https://img.shields.io/badge/arXiv-2412.20138-B31B1B?logo=arxiv"/></a>
-  <a href="https://discord.com/invite/hk9PGKShPK" target="_blank"><img alt="Discord" src="https://img.shields.io/badge/Discord-TradingResearch-7289da?logo=discord&logoColor=white&color=7289da"/></a>
-  <a href="./assets/wechat.png" target="_blank"><img alt="WeChat" src="https://img.shields.io/badge/WeChat-TauricResearch-brightgreen?logo=wechat&logoColor=white"/></a>
-  <a href="https://x.com/TauricResearch" target="_blank"><img alt="X Follow" src="https://img.shields.io/badge/X-TauricResearch-white?logo=x&logoColor=white"/></a>
-  <br>
-  <a href="https://github.com/TauricResearch/" target="_blank"><img alt="Community" src="https://img.shields.io/badge/Join_GitHub_Community-TauricResearch-14C290?logo=discourse"/></a>
-</div>
-
 <div align="center">
-  <!-- Keep these links. Translations will automatically update with the README. -->
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=de">Deutsch</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=es">Español</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=fr">français</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ja">日本語</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ko">한국어</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=pt">Português</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ru">Русский</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=zh">中文</a>
+  <h1>🚀 TradingAgents: Crypto Edition</h1>
+  <p><strong>Multi-Agent AI Framework for Cryptocurrency Trading & Analysis</strong></p>
+  
+  <a href="#quick-start"><img alt="Quick Start" src="https://img.shields.io/badge/⚡-Quick%20Start-brightgreen?style=for-the-badge"/></a>
+  <a href="#crypto-features"><img alt="Crypto Features" src="https://img.shields.io/badge/₿-Crypto%20Focused-orange?style=for-the-badge"/></a>
+  <a href="#docker-setup"><img alt="Docker" src="https://img.shields.io/badge/🐳-Docker%20Ready-blue?style=for-the-badge"/></a>
+  
+  <br><br>
+  
+  <a href="https://github.com/dev-indra/TradingAgents"><img alt="GitHub" src="https://img.shields.io/github/stars/dev-indra/TradingAgents?style=social"/></a>
+  <a href="https://github.com/dev-indra/TradingAgents/fork"><img alt="Fork" src="https://img.shields.io/github/forks/dev-indra/TradingAgents?style=social"/></a>
+  
 </div>
+
+> 🔬 **Based on Tauric Research's groundbreaking work** - This is a substantial fork that reimagines their multi-agent trading framework specifically for cryptocurrency markets, featuring modern architecture, comprehensive crypto data integration, and production-ready deployment.
 
 ---
 
-# TradingAgents: Multi-Agents LLM Financial Trading Framework 
+## 🎯 What's New in This Crypto Edition
 
-> 🎉 **TradingAgents** officially released! We have received numerous inquiries about the work, and we would like to express our thanks for the enthusiasm in our community.
->
-> So we decided to fully open-source the framework. Looking forward to building impactful projects with you!
+This fork transforms the original TradingAgents framework into a **cryptocurrency-focused powerhouse**:
 
-<div align="center">
-<a href="https://www.star-history.com/#TauricResearch/TradingAgents&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=TauricResearch/TradingAgents&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=TauricResearch/TradingAgents&type=Date" />
-   <img alt="TradingAgents Star History" src="https://api.star-history.com/svg?repos=TauricResearch/TradingAgents&type=Date" style="width: 80%; height: auto;" />
- </picture>
-</a>
-</div>
+### 🔥 Major Enhancements
+- **₿ Crypto-Native**: Purpose-built for Bitcoin, Ethereum, and 20+ major cryptocurrencies
+- **🐳 Docker-First**: Complete containerized deployment with microservices architecture
+- **⚡ Real-Time Data**: Live crypto prices, orderbooks, news, and sentiment via multiple APIs
+- **🚀 Modern Stack**: OpenRouter integration for Claude/GPT models, MCP servers, Redis caching
+- **📊 Advanced Analytics**: Fear & Greed Index, social sentiment, on-chain metrics
+- **🛠️ Production Ready**: Comprehensive logging, error handling, and monitoring
 
-<div align="center">
+### 🌐 Quick Navigation
 
-🚀 [TradingAgents](#tradingagents-framework) | ⚡ [Installation & CLI](#installation-and-cli) | 🎬 [Demo](https://www.youtube.com/watch?v=90gr5lwjIho) | 📦 [Package Usage](#tradingagents-package) | 🤝 [Contributing](#contributing) | 📄 [Citation](#citation)
+🎆 [Quick Start](#quick-start) | ₿ [Crypto Features](#crypto-features) | 🐳 [Docker Setup](#docker-setup) | 📊 [API Integration](#api-integration) | 🚀 [Advanced Usage](#advanced-usage) | 🔗 [Original Work](#acknowledgments)
 
-</div>
+## ⚡ Quick Start
 
-## TradingAgents Framework
+**Get your crypto AI trading agents running in under 10 minutes!**
 
-TradingAgents is a multi-agent trading framework that mirrors the dynamics of real-world trading firms. By deploying specialized LLM-powered agents: from fundamental analysts, sentiment experts, and technical analysts, to trader, risk management team, the platform collaboratively evaluates market conditions and informs trading decisions. Moreover, these agents engage in dynamic discussions to pinpoint the optimal strategy.
+```bash
+# 1. Clone this crypto-focused fork
+git clone https://github.com/dev-indra/TradingAgents.git
+cd TradingAgents
+
+# 2. Get your API keys (see API_SETUP.md for details)
+cp .env.example .env
+# Edit .env with your OPENROUTER_API_KEY and COINGECKO_API_KEY
+
+# 3. Start with Docker (Windows PowerShell)
+.\start.ps1
+
+# Or manually
+docker-compose up --build -d
+```
+
+**🎆 That's it!** Your crypto trading agents are now running at:
+- **Web Interface**: http://localhost:3000
+- **API Endpoint**: http://localhost:8000  
+- **Crypto Data**: http://localhost:9000
+- **News & Sentiment**: http://localhost:9001
+
+> 📚 **Need help?** Check our detailed guides: [QUICKSTART.md](QUICKSTART.md) | [API_SETUP.md](API_SETUP.md) | [DOCKER_README.md](DOCKER_README.md)
+
+## ₿ Crypto Features
+
+### **Supported Cryptocurrencies**
+Bitcoin (BTC), Ethereum (ETH), Binance Coin (BNB), XRP, Cardano (ADA), Dogecoin (DOGE), Polygon (MATIC), Solana (SOL), Polkadot (DOT), Avalanche (AVAX), Shiba Inu (SHIB), Litecoin (LTC), Cosmos (ATOM), Chainlink (LINK), Stellar (XLM), and more...
+
+### **Real-Time Data Sources**
+- 📊 **CoinGecko**: Price data, market caps, trading volumes
+- 💰 **Binance**: Live orderbooks and advanced trading metrics
+- 💱 **CoinMarketCap**: Market rankings and alternative data
+- 📰 **NewsAPI**: Latest crypto news and market events
+- 😱 **Fear & Greed Index**: Market sentiment indicator
+- 🗣️ **Reddit**: Social sentiment analysis from crypto communities
+
+### **AI-Powered Analysis**
+- **Technical Indicators**: RSI, MACD, Bollinger Bands, Volume analysis
+- **Sentiment Analysis**: Real-time social media and news sentiment scoring
+- **Fundamental Analysis**: On-chain metrics, market cap analysis, liquidity assessment
+- **Risk Management**: Volatility analysis, portfolio optimization, stop-loss strategies
+
+## 🤖 How the Crypto Agents Work
+
+**TradingAgents Crypto Edition** employs a sophisticated multi-agent architecture specifically designed for cryptocurrency markets. Each AI agent specializes in different aspects of crypto analysis, working together like a professional trading team.
 
 <p align="center">
   <img src="assets/schema.png" style="width: 100%; height: auto;">
 </p>
 
-> TradingAgents framework is designed for research purposes. Trading performance may vary based on many factors, including the chosen backbone language models, model temperature, trading periods, the quality of data, and other non-deterministic factors. [It is not intended as financial, investment, or trading advice.](https://tauric.ai/disclaimer/)
+> ⚠️ **Disclaimer**: This framework is designed for research and educational purposes. Cryptocurrency trading involves significant risk. This is not financial advice - always do your own research and never invest more than you can afford to lose.
 
-Our framework decomposes complex trading tasks into specialized roles. This ensures the system achieves a robust, scalable approach to market analysis and decision-making.
+Our **crypto-specialized agents** decompose complex market analysis into focused roles:
 
-### Analyst Team
-- Fundamentals Analyst: Evaluates company financials and performance metrics, identifying intrinsic values and potential red flags.
-- Sentiment Analyst: Analyzes social media and public sentiment using sentiment scoring algorithms to gauge short-term market mood.
-- News Analyst: Monitors global news and macroeconomic indicators, interpreting the impact of events on market conditions.
-- Technical Analyst: Utilizes technical indicators (like MACD and RSI) to detect trading patterns and forecast price movements.
+### 📈 Crypto Analyst Team
+- **Fundamentals Analyst**: Evaluates crypto project fundamentals, tokenomics, adoption metrics, and on-chain data to identify undervalued assets
+- **Sentiment Analyst**: Analyzes social media buzz, Reddit sentiment, and community engagement to gauge market mood and FOMO/FUD levels  
+- **News Analyst**: Monitors crypto news, regulatory updates, institutional adoption, and macroeconomic events that impact digital asset prices
+- **Technical Analyst**: Uses crypto-specific technical indicators, support/resistance levels, and chart patterns optimized for 24/7 volatile markets
 
 <p align="center">
   <img src="assets/analyst.png" width="100%" style="display: inline-block; margin: 0 2%;">
 </p>
 
-### Researcher Team
-- Comprises both bullish and bearish researchers who critically assess the insights provided by the Analyst Team. Through structured debates, they balance potential gains against inherent risks.
+### 🔬 Crypto Research Team
+- **Bull & Bear Researchers** engage in structured debates about crypto market conditions, balancing potential gains against volatility risks
+- Specialized in crypto market dynamics: HODLing vs trading strategies, DeFi opportunities, regulatory impact analysis
+- Considers crypto-specific factors: network effects, developer activity, institutional adoption, and market cycles
 
 <p align="center">
   <img src="assets/researcher.png" width="70%" style="display: inline-block; margin: 0 2%;">
 </p>
 
-### Trader Agent
-- Composes reports from the analysts and researchers to make informed trading decisions. It determines the timing and magnitude of trades based on comprehensive market insights.
+### 🚀 Crypto Trader Agent
+- Synthesizes multi-agent analysis into actionable crypto trading recommendations
+- Optimized for crypto market characteristics: 24/7 trading, high volatility, liquidity considerations
+- Implements crypto-specific strategies: DCA, HODLing, momentum trading, and portfolio rebalancing
 
 <p align="center">
   <img src="assets/trader.png" width="70%" style="display: inline-block; margin: 0 2%;">
 </p>
 
-### Risk Management and Portfolio Manager
-- Continuously evaluates portfolio risk by assessing market volatility, liquidity, and other risk factors. The risk management team evaluates and adjusts trading strategies, providing assessment reports to the Portfolio Manager for final decision.
-- The Portfolio Manager approves/rejects the transaction proposal. If approved, the order will be sent to the simulated exchange and executed.
+### 🛡️ Crypto Risk Management & Portfolio Manager
+- **Advanced Risk Assessment**: Evaluates crypto-specific risks including volatility spikes, regulatory changes, and market manipulation
+- **Portfolio Optimization**: Balances crypto allocations across different categories (DeFi, Layer 1s, meme coins, stablecoins)
+- **Execution Control**: Final approval/rejection of trades with crypto-optimized stop-losses and position sizing
 
 <p align="center">
   <img src="assets/risk.png" width="70%" style="display: inline-block; margin: 0 2%;">
 </p>
 
-## Installation and CLI
+## 🐳 Docker Setup
 
-### Installation
+**Recommended approach** - Get everything running with Docker in minutes:
 
-Clone TradingAgents:
+### Prerequisites
+- Docker Desktop installed and running
+- At least 4GB RAM available for containers
+- API keys: [OpenRouter](https://openrouter.ai/keys) + [CoinGecko](https://www.coingecko.com/en/api) (minimum)
+
+### Quick Docker Start
+
 ```bash
-git clone https://github.com/TauricResearch/TradingAgents.git
+# Clone this crypto fork
+git clone https://github.com/dev-indra/TradingAgents.git
 cd TradingAgents
+
+# Setup environment
+cp .env.example .env
+# Edit .env with your API keys
+
+# Windows PowerShell (recommended)
+.\start.ps1
+
+# Or manual Docker
+docker-compose up --build -d
 ```
 
-Create a virtual environment in any of your favorite environment managers:
+### 📊 API Integration
+
+This crypto edition integrates multiple APIs for comprehensive market data:
+
+**✅ Required APIs:**
+- **OpenRouter**: AI agents (Claude-3.5-Sonnet, GPT-4) - `~$5-15/month`
+- **CoinGecko**: Crypto prices & market data - `Free tier available`
+
+**🚀 Recommended APIs:**
+- **Binance**: Real-time orderbooks - `Free`
+- **NewsAPI**: Crypto news sentiment - `Free tier`
+- **CoinMarketCap**: Market rankings - `Free tier`
+
+**🔥 Optional APIs:**
+- **Reddit**: Social sentiment analysis - `Free`
+
+> 📚 **Detailed Setup**: See [API_SETUP.md](API_SETUP.md) for step-by-step API key instructions
+
+### Alternative: Python Virtual Environment
+
 ```bash
-conda create -n tradingagents python=3.13
+# Create virtual environment
+conda create -n tradingagents python=3.12
 conda activate tradingagents
-```
 
-Install dependencies:
-```bash
+# Install dependencies
 pip install -r requirements.txt
-```
 
-### Required APIs
-
-You will also need the FinnHub API for financial data. All of our code is implemented with the free tier.
-```bash
-export FINNHUB_API_KEY=$YOUR_FINNHUB_API_KEY
-```
-
-You will need the OpenAI API for all the agents.
-```bash
-export OPENAI_API_KEY=$YOUR_OPENAI_API_KEY
-```
-
-### CLI Usage
-
-You can also try out the CLI directly by running:
-```bash
+# Run locally
 python -m cli.main
 ```
-You will see a screen where you can select your desired tickers, date, LLMs, research depth, etc.
+
+### 💻 CLI Usage
+
+**Interactive crypto analysis** - Choose your cryptocurrency and watch the agents work:
+
+```bash
+# Start interactive CLI
+python -m cli.main
+
+# Or analyze specific crypto directly
+python main.py --crypto BTC --date 2024-01-15
+```
+
+The CLI provides an intuitive interface to:
+- **Select Cryptocurrencies**: BTC, ETH, ADA, SOL, and 20+ others
+- **Choose Analysis Date**: Historical or real-time analysis
+- **Configure AI Models**: Claude-3.5-Sonnet, GPT-4, or cost-effective alternatives
+- **Set Research Depth**: Quick analysis vs comprehensive deep-dive
 
 <p align="center">
   <img src="assets/cli/cli_init.png" width="100%" style="display: inline-block; margin: 0 2%;">
 </p>
 
-An interface will appear showing results as they load, letting you track the agent's progress as it runs.
+**Real-time agent progress** - Watch your AI team collaborate:
 
 <p align="center">
   <img src="assets/cli/cli_news.png" width="100%" style="display: inline-block; margin: 0 2%;">
 </p>
 
+**Final trading recommendation** with detailed reasoning:
+
 <p align="center">
   <img src="assets/cli/cli_transaction.png" width="100%" style="display: inline-block; margin: 0 2%;">
 </p>
 
-## TradingAgents Package
+## 🚀 Advanced Usage
 
-### Implementation Details
+### 💻 Python API
 
-We built TradingAgents with LangGraph to ensure flexibility and modularity. We utilize `o1-preview` and `gpt-4o` as our deep thinking and fast thinking LLMs for our experiments. However, for testing purposes, we recommend you use `o4-mini` and `gpt-4.1-mini` to save on costs as our framework makes **lots of** API calls.
-
-### Python Usage
-
-To use TradingAgents inside your code, you can import the `tradingagents` module and initialize a `TradingAgentsGraph()` object. The `.propagate()` function will return a decision. You can run `main.py`, here's also a quick example:
+**Built on LangGraph** for maximum flexibility and crypto-optimized agent orchestration:
 
 ```python
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 
+# Initialize crypto trading agents
 ta = TradingAgentsGraph(debug=True, config=DEFAULT_CONFIG.copy())
 
-# forward propagate
-_, decision = ta.propagate("NVDA", "2024-05-10")
-print(decision)
+# Analyze Bitcoin
+state, decision = ta.propagate("BTC", "2024-01-15")
+print(f"Bitcoin Analysis: {decision}")
+
+# Analyze Ethereum
+state, decision = ta.propagate("ETH", "2024-01-15")
+print(f"Ethereum Analysis: {decision}")
 ```
 
-You can also adjust the default configuration to set your own choice of LLMs, debate rounds, etc.
+### ⚙️ Custom Configuration
+
+**Optimize for your needs** - Adjust AI models, trading strategies, and risk parameters:
 
 ```python
-from tradingagents.graph.trading_graph import TradingAgentsGraph
-from tradingagents.default_config import DEFAULT_CONFIG
-
-# Create a custom config
+# Create crypto-optimized config
 config = DEFAULT_CONFIG.copy()
-config["deep_think_llm"] = "gpt-4.1-nano"  # Use a different model
-config["quick_think_llm"] = "gpt-4.1-nano"  # Use a different model
-config["max_debate_rounds"] = 1  # Increase debate rounds
-config["online_tools"] = True # Use online tools or cached data
+
+# AI Model Selection
+config["deep_think_llm"] = "anthropic/claude-3.5-sonnet"  # Best reasoning
+config["quick_think_llm"] = "openai/gpt-4o-mini"  # Cost-effective
+
+# Trading Parameters  
+config["trading_mode"] = "crypto"  # Crypto-specific features
+config["max_debate_rounds"] = 2  # More thorough analysis
+config["online_tools"] = True  # Real-time data
+
+# Crypto-specific risk management
+config["crypto_risk_settings"]["max_position_size"] = 0.05  # 5% max position
+config["crypto_risk_settings"]["stop_loss_percentage"] = 0.10  # 10% stop loss
 
 # Initialize with custom config
 ta = TradingAgentsGraph(debug=True, config=config)
-
-# forward propagate
-_, decision = ta.propagate("NVDA", "2024-05-10")
-print(decision)
 ```
 
-> For `online_tools`, we recommend enabling them for experimentation, as they provide access to real-time data. The agents' offline tools rely on cached data from our **Tauric TradingDB**, a curated dataset we use for backtesting. We're currently in the process of refining this dataset, and we plan to release it soon alongside our upcoming projects. Stay tuned!
+### 🐳 Microservices Architecture
 
-You can view the full list of configurations in `tradingagents/default_config.py`.
+**Production-ready deployment** with specialized services:
 
-## Contributing
+- **Main TradingAgents**: Core agent orchestration (Port 8000)
+- **Crypto MCP Server**: Real-time crypto data (Port 9000)
+- **News MCP Server**: Sentiment analysis (Port 9001)  
+- **Redis Cache**: Performance optimization (Port 6379)
+- **Web Interface**: Visual agent interaction (Port 3000)
 
-We welcome contributions from the community! Whether it's fixing a bug, improving documentation, or suggesting a new feature, your input helps make this project better. If you are interested in this line of research, please consider joining our open-source financial AI research community [Tauric Research](https://tauric.ai/).
+```bash
+# Check all services
+docker-compose ps
 
-## Citation
+# View logs
+docker-compose logs -f tradingagents
 
-Please reference our work if you find *TradingAgents* provides you with some help :)
-
+# Scale services
+docker-compose up --scale mcp-crypto=2
 ```
+
+### 📊 Performance Optimization
+
+**Cost-effective operation** with intelligent caching:
+
+- **Redis Caching**: 5-minute TTL for market data
+- **API Rate Limiting**: Built-in throttling for all data sources
+- **Model Selection**: Use GPT-4o-mini for routine tasks, Claude-3.5-Sonnet for complex analysis
+- **Batch Processing**: Analyze multiple cryptos efficiently
+
+> 📚 **Full Configuration**: See `tradingagents/default_config.py` for all available options
+
+## 🤝 Contributing
+
+**Join the crypto AI trading revolution!** We welcome all contributions:
+
+- 🐛 **Bug Reports**: Found an issue? Let us know!
+- 🚀 **Feature Requests**: Want crypto-specific functionality? Suggest it!
+- 📝 **Documentation**: Help others get started
+- 💻 **Code**: Improve agent logic, add new data sources, enhance UI
+
+```bash
+# Fork the repo
+git clone https://github.com/YOUR_USERNAME/TradingAgents.git
+
+# Create feature branch
+git checkout -b crypto-feature-amazing
+
+# Make changes, test, and commit
+git commit -m "Add amazing crypto feature"
+
+# Push and create PR
+git push origin crypto-feature-amazing
+```
+
+### 📫 Get In Touch
+- **Issues**: [GitHub Issues](https://github.com/dev-indra/TradingAgents/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/dev-indra/TradingAgents/discussions)
+- **Email**: Open an issue for contact
+
+## 🔗 Acknowledgments
+
+### 🎆 Original TradingAgents Framework
+
+This project is built upon the **groundbreaking work** by [Tauric Research](https://tauric.ai/):
+
+> **Original Paper**: [TradingAgents: Multi-Agents LLM Financial Trading Framework](https://arxiv.org/abs/2412.20138)  
+> **Authors**: Yijia Xiao, Edward Sun, Di Luo, Wei Wang  
+> **Repository**: [TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)
+
+**🙏 Deep appreciation** to the Tauric Research team for:
+- Creating the innovative multi-agent trading framework
+- Open-sourcing their research for the community
+- Pioneering the use of LLM agents in financial analysis
+- Providing the foundation that made this crypto edition possible
+
+### 🔍 What This Fork Adds
+
+While respecting and building upon their excellent foundation, this fork adds:
+- **Complete crypto market focus** with 20+ cryptocurrencies
+- **Modern deployment** via Docker and microservices
+- **Real-time data integration** from multiple crypto APIs
+- **Enhanced agent specialization** for crypto market dynamics
+- **Production-ready architecture** with caching and error handling
+
+## 📄 Citations
+
+**If this crypto edition helps your research**, please cite both:
+
+```bibtex
+# Original TradingAgents paper
 @misc{xiao2025tradingagentsmultiagentsllmfinancial,
       title={TradingAgents: Multi-Agents LLM Financial Trading Framework}, 
       author={Yijia Xiao and Edward Sun and Di Luo and Wei Wang},
@@ -208,6 +367,26 @@ Please reference our work if you find *TradingAgents* provides you with some hel
       eprint={2412.20138},
       archivePrefix={arXiv},
       primaryClass={q-fin.TR},
-      url={https://arxiv.org/abs/2412.20138}, 
+      url={https://arxiv.org/abs/2412.20138}
+}
+
+# This crypto-focused implementation
+@software{tradingagents_crypto_edition,
+      title={TradingAgents: Crypto Edition - Multi-Agent AI Framework for Cryptocurrency Trading},
+      author={dev-indra and contributors},
+      year={2025},
+      url={https://github.com/dev-indra/TradingAgents},
+      note={Cryptocurrency-focused fork of TradingAgents by Tauric Research}
 }
 ```
+
+---
+
+<div align="center">
+  
+**🚀 Ready to revolutionize crypto trading with AI agents?**  
+[Get Started Now](#quick-start) | [Join the Community](#contributing) | [Star the Repo](https://github.com/dev-indra/TradingAgents)
+
+*Built with ♥️ for the crypto community*
+
+</div>
