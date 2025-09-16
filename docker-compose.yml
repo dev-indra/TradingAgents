@@ -84,6 +84,14 @@ services:
       - "3000:3000"
     environment:
       - TRADINGAGENTS_API_URL=http://tradingagents:8000
+      - REDIS_URL=redis://redis:6379
+      # LLM Provider API Keys
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # LM Studio Host Configuration
+      - LM_STUDIO_HOST=${LM_STUDIO_HOST:-host.docker.internal}
+      - LM_STUDIO_PORT=${LM_STUDIO_PORT:-1234}
     depends_on:
       - tradingagents
     networks:
