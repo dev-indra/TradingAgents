@@ -8,9 +8,38 @@ Write-Host "=================================================" -ForegroundColor 
 if (!(Test-Path ".env")) {
     Write-Host "📋 Creating .env file from template..." -ForegroundColor Yellow
     Copy-Item ".env.example" ".env"
-    Write-Host "⚠️  Please edit .env file with your API keys before continuing!" -ForegroundColor Yellow
-    Write-Host "   Required: OPENROUTER_API_KEY, COINGECKO_API_KEY" -ForegroundColor Yellow
-    Read-Host "Press enter when you've configured your .env file"
+    Write-Host ""
+    Write-Host "⚠️  SETUP REQUIRED: Please configure your API keys!" -ForegroundColor Yellow
+    Write-Host "   ✅ Required: OPENROUTER_API_KEY (AI agents)" -ForegroundColor Yellow  
+    Write-Host "   ✅ Required: COINGECKO_API_KEY (crypto data - free)" -ForegroundColor Yellow
+    Write-Host "   📖 See API_SETUP.md for detailed instructions" -ForegroundColor Cyan
+    Write-Host "   📝 Edit .env file with: notepad .env" -ForegroundColor Cyan
+    Write-Host ""
+    Read-Host "Press enter when you've added your API keys to .env"
+}
+
+# Check if required API keys are configured
+$envContent = Get-Content ".env" -ErrorAction SilentlyContinue
+if ($envContent) {
+    $hasOpenRouter = $envContent | Where-Object { $_ -match "^OPENROUTER_API_KEY=.+" -and $_ -notmatch "your_openrouter_api_key_here" }
+    $hasCoinGecko = $envContent | Where-Object { $_ -match "^COINGECKO_API_KEY=.+" -and $_ -notmatch "your_coingecko_api_key_here" }
+    
+    if (-not $hasOpenRouter) {
+        Write-Host "❌ OPENROUTER_API_KEY not configured in .env" -ForegroundColor Red
+        Write-Host "   Get key: https://openrouter.ai/keys" -ForegroundColor Cyan
+    }
+    if (-not $hasCoinGecko) {
+        Write-Host "❌ COINGECKO_API_KEY not configured in .env" -ForegroundColor Red  
+        Write-Host "   Get key: https://www.coingecko.com/en/api" -ForegroundColor Cyan
+    }
+    
+    if (-not $hasOpenRouter -or -not $hasCoinGecko) {
+        Write-Host ""
+        Write-Host "📖 See API_SETUP.md for step-by-step instructions" -ForegroundColor Yellow
+        Read-Host "Press enter to continue anyway (some features may not work)"
+    } else {
+        Write-Host "✅ API keys configured!" -ForegroundColor Green
+    }
 }
 
 # Create necessary directories
