@@ -31,7 +31,7 @@ This fork transforms the original TradingAgents framework into a **cryptocurrenc
 
 ### 🌐 Quick Navigation
 
-🎆 [Quick Start](#quick-start) | ₿ [Crypto Features](#crypto-features) | 🐳 [Docker Setup](#docker-setup) | 📊 [API Integration](#api-integration) | 🚀 [Advanced Usage](#advanced-usage) | 🔗 [Original Work](#acknowledgments)
+🎆 [Quick Start](#quick-start) | 🌐 [Web Interface](#web-interface-features) | ₿ [Crypto Features](#crypto-features) | 🐳 [Docker Setup](#docker-setup) | 💻 [Usage Options](#usage-options) | 🚀 [Advanced Usage](#advanced-usage) | 🔧 [Troubleshooting](#troubleshooting)
 
 ## ⚡ Quick Start
 
@@ -54,12 +54,40 @@ docker-compose up --build -d
 ```
 
 **🎆 That's it!** Your crypto trading agents are now running at:
-- **Web Interface**: http://localhost:3000
-- **API Endpoint**: http://localhost:8000  
-- **Crypto Data**: http://localhost:9000
-- **News & Sentiment**: http://localhost:9001
+- **🌐 Web Dashboard**: http://localhost:3000 (Full-featured React UI)
+- **🤖 Main API**: http://localhost:8000 (Agent orchestration)
+- **💰 Crypto Data**: http://localhost:9000 (Real-time prices & market data)
+- **📰 News Service**: http://localhost:9001 (Sentiment analysis & news)
 
-> 📚 **Need help?** Check our detailed guides: [QUICKSTART.md](QUICKSTART.md) | [API_SETUP.md](API_SETUP.md) | [DOCKER_README.md](DOCKER_README.md)
+### 🌐 Web Interface Features
+
+The **React-based dashboard** at http://localhost:3000 provides:
+
+**📊 Market Overview Dashboard:**
+- Live cryptocurrency prices, market caps, and 24h price changes  
+- Interactive cryptocurrency selection (BTC, ETH, SOL, AVAX, BNB, ADA, DOT, MATIC, etc.)
+- Real-time market data from CoinGecko and Binance APIs
+- Beautiful, responsive design optimized for crypto trading
+
+**🤖 AI Analysis Center:**
+- Configure multi-agent analysis parameters
+- Watch agents work in real-time with progress tracking
+- View detailed reports from each specialist team
+- Export analysis results and trading recommendations
+
+**📰 News & Sentiment Hub:**
+- Aggregated cryptocurrency news from multiple sources
+- AI-powered sentiment analysis of market events
+- Social media sentiment tracking from Reddit and other platforms
+- Correlation between news sentiment and price movements
+
+**⚙️ System Monitoring:**
+- Real-time health status of all microservices
+- Service performance metrics and uptime monitoring
+- API usage and cost tracking
+- Error reporting and troubleshooting guides
+
+> 📚 **Need help?** Check our detailed guides: [QUICKSTART.md](QUICKSTART.md) | [API_SETUP.md](API_SETUP.md)
 
 ## ₿ Crypto Features
 
@@ -188,41 +216,71 @@ pip install -r requirements.txt
 python -m cli.main
 ```
 
-### 💻 CLI Usage
+### 💻 Usage Options
 
-**Interactive crypto analysis** - Choose your cryptocurrency and watch the agents work:
+**Multiple ways to interact with your crypto trading agents:**
 
+#### 🌐 Web Interface (Recommended)
 ```bash
-# Start interactive CLI
-python -m cli.main
+# Access the full-featured web dashboard
+# Windows
+start http://localhost:3000
 
-# Or analyze specific crypto directly
-python main.py --crypto BTC --date 2024-01-15
+# Mac/Linux  
+open http://localhost:3000
 ```
 
-The CLI provides an intuitive interface to:
-- **Select Cryptocurrencies**: BTC, ETH, ADA, SOL, and 20+ others
-- **Choose Analysis Date**: Historical or real-time analysis
-- **Configure AI Models**: Claude-3.5-Sonnet, GPT-4, or cost-effective alternatives
-- **Set Research Depth**: Quick analysis vs comprehensive deep-dive
+The **Web Interface** provides:
+- **📊 Market Overview**: Real-time crypto prices, market caps, and trading volumes
+- **🤖 AI Analysis**: Multi-agent analysis with live progress tracking
+- **📰 News & Sentiment**: Aggregated crypto news with sentiment analysis
+- **⚙️ System Status**: Monitor all services health in real-time
+- **🎯 Interactive Dashboard**: Select cryptocurrencies, configure analysis depth
 
-<p align="center">
-  <img src="assets/cli/cli_init.png" width="100%" style="display: inline-block; margin: 0 2%;">
-</p>
+#### 🖥️ Command Line Interface
+```bash
+# Interactive CLI with rich formatting
+python -m cli.main
 
-**Real-time agent progress** - Watch your AI team collaborate:
+# Or direct analysis of multiple cryptos
+python main.py
+```
 
-<p align="center">
-  <img src="assets/cli/cli_news.png" width="100%" style="display: inline-block; margin: 0 2%;">
-</p>
+The **CLI Interface** features:
+- **Rich Terminal UI**: Beautiful progress bars, status indicators, and formatted output
+- **Real-Time Progress**: Watch each agent complete their analysis tasks
+- **Comprehensive Reports**: Detailed analyst reports, research debates, and trading recommendations
+- **Multi-Crypto Analysis**: Batch process multiple cryptocurrencies (BTC, ETH, SOL, AVAX, etc.)
 
-**Final trading recommendation** with detailed reasoning:
+#### 📡 API Access
+```bash
+# Direct API calls to services (Linux/Mac)
+curl http://localhost:3000/api/health
+curl http://localhost:9000/crypto/BTC/price  
+curl http://localhost:9001/news/crypto
 
-<p align="center">
-  <img src="assets/cli/cli_transaction.png" width="100%" style="display: inline-block; margin: 0 2%;">
-</p>
+# Windows PowerShell
+Invoke-RestMethod http://localhost:3000/api/health
+Invoke-RestMethod http://localhost:9000/crypto/BTC/price
+```
 
 ## 🚀 Advanced Usage
+
+### 🌐 Web Interface Features
+
+**Professional Trading Dashboard** at http://localhost:3000:
+
+- **📊 Market Overview Tab**: Live cryptocurrency data with price charts, market caps, and 24h changes
+- **🤖 AI Analysis Tab**: Configure and run multi-agent analysis with real-time progress tracking  
+- **📰 News & Sentiment Tab**: Aggregated crypto news with AI-powered sentiment analysis
+- **📋 Portfolio Tab**: Portfolio management and tracking (coming soon)
+- **⚙️ System Status**: Real-time health monitoring of all microservices
+
+**Interactive Agent Monitoring:**
+- Watch agents progress through analysis phases
+- View detailed reports from each specialist team
+- Export analysis results and trading recommendations
+- Configure risk parameters and analysis depth
 
 ### 💻 Python API
 
@@ -231,17 +289,21 @@ The CLI provides an intuitive interface to:
 ```python
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
+from datetime import datetime
 
 # Initialize crypto trading agents
 ta = TradingAgentsGraph(debug=True, config=DEFAULT_CONFIG.copy())
 
-# Analyze Bitcoin
-state, decision = ta.propagate("BTC", "2024-01-15")
+# Analyze Bitcoin with current date
+current_date = datetime.now().strftime("%Y-%m-%d")
+state, decision = ta.propagate("BTC", current_date)
 print(f"Bitcoin Analysis: {decision}")
 
-# Analyze Ethereum
-state, decision = ta.propagate("ETH", "2024-01-15")
-print(f"Ethereum Analysis: {decision}")
+# Analyze multiple cryptocurrencies
+cryptos = ["BTC", "ETH", "SOL", "AVAX"]
+for crypto in cryptos:
+    state, decision = ta.propagate(crypto, current_date)
+    print(f"{crypto} Analysis: {decision}")
 ```
 
 ### ⚙️ Custom Configuration
@@ -273,31 +335,74 @@ ta = TradingAgentsGraph(debug=True, config=config)
 
 **Production-ready deployment** with specialized services:
 
-- **Main TradingAgents**: Core agent orchestration (Port 8000)
-- **Crypto MCP Server**: Real-time crypto data (Port 9000)
-- **News MCP Server**: Sentiment analysis (Port 9001)  
-- **Redis Cache**: Performance optimization (Port 6379)
-- **Web Interface**: Visual agent interaction (Port 3000)
+| Service | Port | Purpose | Status Endpoint |
+|---------|------|---------|----------------|
+| **Web Interface** | 3000 | React dashboard with agent monitoring | http://localhost:3000/api/health |
+| **Main TradingAgents** | 8000 | Core agent orchestration & analysis | http://localhost:8000/health |
+| **Crypto MCP Server** | 9000 | Real-time crypto data via CoinGecko/Binance | http://localhost:9000/health |
+| **News MCP Server** | 9001 | News aggregation & sentiment analysis | http://localhost:9001/health |
+| **Redis Cache** | 6379 | Performance optimization & data caching | Internal service |
 
+**Service Management:**
 ```bash
-# Check all services
+# Check all services health
 docker-compose ps
 
-# View logs
+# View specific service logs  
 docker-compose logs -f tradingagents
+docker-compose logs -f web-ui
+docker-compose logs -f mcp-crypto
 
-# Scale services
-docker-compose up --scale mcp-crypto=2
+# Restart specific services
+docker-compose restart web-ui
+
+# Scale MCP servers for high load
+docker-compose up --scale mcp-crypto=2 --scale mcp-news=2
 ```
 
 ### 📊 Performance Optimization
 
 **Cost-effective operation** with intelligent caching:
 
-- **Redis Caching**: 5-minute TTL for market data
-- **API Rate Limiting**: Built-in throttling for all data sources
-- **Model Selection**: Use GPT-4o-mini for routine tasks, Claude-3.5-Sonnet for complex analysis
-- **Batch Processing**: Analyze multiple cryptos efficiently
+- **Redis Caching**: 5-minute TTL for market data, reduces API costs by 80%+
+- **API Rate Limiting**: Built-in throttling prevents hitting API limits
+- **Smart Model Selection**: GPT-4o-mini for routine analysis, Claude-3.5-Sonnet for complex reasoning
+- **Batch Processing**: Process multiple cryptocurrencies in parallel
+- **MCP Server Optimization**: Dedicated servers for crypto data and news prevent bottlenecks
+
+**Cost Monitoring:**
+```bash
+# Monitor API usage costs
+docker-compose logs tradingagents | grep "API_COST"
+
+# Check Redis cache hit rates
+docker exec tradingagents-redis redis-cli info stats | grep hit
+```
+
+### 🔧 Troubleshooting
+
+**Common Issues & Solutions:**
+
+| Issue | Symptoms | Solution |
+|-------|----------|----------|
+| **API Keys Missing** | Services failing to start | Check `.env` file, see [API_SETUP.md](API_SETUP.md) |
+| **Docker Build Fails** | Web UI container errors | Run `docker-compose build --no-cache` |
+| **Agents Not Responding** | Empty analysis results | Check OpenRouter API key and balance |
+| **MCP Servers Restarting** | "Restarting (1)" status | Check API rate limits and internet connection |
+| **Web UI Not Loading** | 3000 port not responding | Restart: `docker-compose restart web-ui` |
+
+**Health Check Commands:**
+```bash
+# Quick health check all services
+curl http://localhost:3000/api/health  # Web UI
+curl http://localhost:8000/health      # Main service (if implemented)
+curl http://localhost:9000/health      # Crypto MCP (if implemented)
+curl http://localhost:9001/health      # News MCP (if implemented)
+
+# View comprehensive service status
+docker-compose ps
+docker-compose logs --tail=50 tradingagents
+```
 
 > 📚 **Full Configuration**: See `tradingagents/default_config.py` for all available options
 
