@@ -4,22 +4,10 @@ import { useState } from 'react'
 import { PlusIcon, TrashIcon, PencilIcon, XMarkIcon, CheckIcon, ChartBarIcon } from '@heroicons/react/24/outline'
 import { usePortfolio, PortfolioAsset } from '@/context/PortfolioContext'
 import PortfolioAnalytics from './PortfolioAnalytics'
+import CryptoSearchSelector from './CryptoSearchSelector'
+import CryptoIcon from './CryptoIcon'
+import { CoinGeckoSearchResult, coinGeckoService } from '@/lib/coingecko'
 
-// Available cryptocurrencies with their icons
-const AVAILABLE_CRYPTOS = [
-  { symbol: 'BTC', name: 'Bitcoin', icon: '₿' },
-  { symbol: 'ETH', name: 'Ethereum', icon: 'Ξ' },
-  { symbol: 'SOL', name: 'Solana', icon: '◎' },
-  { symbol: 'AVAX', name: 'Avalanche', icon: '△' },
-  { symbol: 'BNB', name: 'BNB', icon: '𝑩' },
-  { symbol: 'ADA', name: 'Cardano', icon: '₳' },
-  { symbol: 'DOT', name: 'Polkadot', icon: '●' },
-  { symbol: 'MATIC', name: 'Polygon', icon: '▣' },
-  { symbol: 'LINK', name: 'Chainlink', icon: '🔗' },
-  { symbol: 'UNI', name: 'Uniswap', icon: '🦄' },
-  { symbol: 'LTC', name: 'Litecoin', icon: 'Ł' },
-  { symbol: 'XRP', name: 'XRP', icon: '◆' },
-]
 
 interface AddAssetFormProps {
   onAdd: (asset: PortfolioAsset) => void
@@ -27,31 +15,53 @@ interface AddAssetFormProps {
 }
 
 function AddAssetForm({ onAdd, onCancel }: AddAssetFormProps) {
+  const [selectedCrypto, setSelectedCrypto] = useState<CoinGeckoSearchResult | null>(null)
   const [formData, setFormData] = useState({
-    symbol: '',
     quantity: '',
     averagePrice: '',
     notes: ''
   })
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleCryptoSelect = async (crypto: CoinGeckoSearchResult) => {
+    setSelectedCrypto(crypto)
+    
+    // Optionally fetch current price to suggest as average price
+    try {
+      setIsLoading(true)
+      const coinData = await coinGeckoService.getCoinData(crypto.id)
+      if (coinData?.current_price) {
+        setFormData(prev => ({ 
+          ...prev, 
+          averagePrice: coinData.current_price!.toString() 
+        }))
+      }
+    } catch (error) {
+      console.error('Failed to fetch current price:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
-    const crypto = AVAILABLE_CRYPTOS.find(c => c.symbol === formData.symbol)
-    if (!crypto) return
+    if (!selectedCrypto) return
 
     const asset: PortfolioAsset = {
-      symbol: crypto.symbol,
-      name: crypto.name,
-      icon: crypto.icon,
+      symbol: selectedCrypto.symbol.toUpperCase(),
+      name: selectedCrypto.name,
+      coinGeckoId: selectedCrypto.id,
       quantity: parseFloat(formData.quantity),
       averagePrice: parseFloat(formData.averagePrice),
+      icon: selectedCrypto.large || selectedCrypto.thumb || '',
       addedAt: new Date().toISOString(),
       notes: formData.notes
     }
 
     onAdd(asset)
-    setFormData({ symbol: '', quantity: '', averagePrice: '', notes: '' })
+    setSelectedCrypto(null)
+    setFormData({ quantity: '', averagePrice: '', notes: '' })
   }
 
   return (
@@ -71,19 +81,42 @@ function AddAssetForm({ onAdd, onCancel }: AddAssetFormProps) {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Cryptocurrency
           </label>
-          <select
-            value={formData.symbol}
-            onChange={(e) => setFormData(prev => ({ ...prev, symbol: e.target.value }))}
-            required
-            className="w-full border-gray-300 rounded-md shadow-sm focus:ring-crypto-500 focus:border-crypto-500"
-          >
-            <option value="">Select a cryptocurrency</option>
-            {AVAILABLE_CRYPTOS.map(crypto => (
-              <option key={crypto.symbol} value={crypto.symbol}>
-                {crypto.icon} {crypto.name} ({crypto.symbol})
-              </option>
-            ))}
-          </select>
+          {!selectedCrypto ? (
+            <CryptoSearchSelector
+              onSelect={handleCryptoSelect}
+              placeholder="Search for any cryptocurrency (Bitcoin, Ethereum, Solana...)"
+              className="w-full"
+            />
+          ) : (
+            <div className="p-3 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <CryptoIcon 
+                  symbol={selectedCrypto.symbol}
+                  name={selectedCrypto.name}
+                  coinGeckoId={selectedCrypto.id}
+                  iconUrl={selectedCrypto.large || selectedCrypto.thumb}
+                  size="lg"
+                />
+                <div>
+                  <div className="font-medium text-gray-900">
+                    {selectedCrypto.name} ({selectedCrypto.symbol.toUpperCase()})
+                  </div>
+                  {selectedCrypto.market_cap_rank && (
+                    <div className="text-xs text-gray-500">
+                      Rank #{selectedCrypto.market_cap_rank}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedCrypto(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -141,9 +174,13 @@ function AddAssetForm({ onAdd, onCancel }: AddAssetFormProps) {
           </button>
           <button
             type="submit"
-            className="px-4 py-2 text-sm font-medium text-white bg-crypto-600 border border-transparent rounded-md hover:bg-crypto-700"
+            disabled={!selectedCrypto || isLoading || !formData.quantity || !formData.averagePrice}
+            className="px-4 py-2 text-sm font-medium text-white bg-crypto-600 border border-transparent rounded-md hover:bg-crypto-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
           >
-            Add Asset
+            {isLoading && (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            )}
+            <span>Add Asset</span>
           </button>
         </div>
       </form>
@@ -337,7 +374,13 @@ export default function PortfolioManager() {
               <div key={asset.symbol} className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="text-2xl">{asset.icon}</div>
+                    <CryptoIcon 
+                      symbol={asset.symbol}
+                      name={asset.name}
+                      coinGeckoId={asset.coinGeckoId}
+                      iconUrl={asset.icon}
+                      size="xl"
+                    />
                     <div>
                       <div className="font-medium text-gray-900">
                         {asset.name} ({asset.symbol})

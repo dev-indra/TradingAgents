@@ -10,6 +10,10 @@ export interface PortfolioAsset {
   icon: string
   addedAt: string
   notes?: string
+  coinGeckoId?: string // CoinGecko API ID for fetching real-time data
+  currentPrice?: number // Real-time price from CoinGecko
+  priceChange24h?: number // 24h price change percentage
+  marketCapRank?: number // CoinGecko market cap ranking
 }
 
 export interface PortfolioContextType {
@@ -35,27 +39,30 @@ const DEFAULT_ASSETS: PortfolioAsset[] = [
     name: 'Bitcoin',
     quantity: 0.1,
     averagePrice: 45000,
-    icon: '₿',
+    icon: 'https://assets.coingecko.com/coins/images/1/thumb/bitcoin.png',
     addedAt: new Date().toISOString(),
-    notes: 'Digital gold'
+    notes: 'Digital gold',
+    coinGeckoId: 'bitcoin'
   },
   {
     symbol: 'ETH',
     name: 'Ethereum',
     quantity: 2.5,
     averagePrice: 3000,
-    icon: 'Ξ',
+    icon: 'https://assets.coingecko.com/coins/images/279/thumb/ethereum.png',
     addedAt: new Date().toISOString(),
-    notes: 'Smart contract platform'
+    notes: 'Smart contract platform',
+    coinGeckoId: 'ethereum'
   },
   {
     symbol: 'SOL',
     name: 'Solana',
     quantity: 50,
     averagePrice: 80,
-    icon: '◎',
+    icon: 'https://assets.coingecko.com/coins/images/4128/thumb/solana.png',
     addedAt: new Date().toISOString(),
-    notes: 'Fast and low-cost blockchain'
+    notes: 'Fast and low-cost blockchain',
+    coinGeckoId: 'solana'
   }
 ]
 

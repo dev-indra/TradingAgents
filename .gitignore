@@ -117,7 +117,8 @@ data/
 logs/
 *.log
 *.csv
-src/
+# Only ignore Python src, not web src
+/src/
 eval_results/
 eval_data/
 

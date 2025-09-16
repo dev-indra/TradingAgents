@@ -3,6 +3,7 @@
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { usePortfolio } from '@/context/PortfolioContext'
 import { ArrowUpIcon, ArrowDownIcon, ChartBarIcon } from '@heroicons/react/24/outline'
+import CryptoIcon from './CryptoIcon'
 
 const COLORS = ['#0ea5e9', '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#84cc16']
 
@@ -230,8 +231,14 @@ export default function PortfolioAnalytics() {
                 <tr key={asset.symbol}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="text-lg mr-3">
-                        {assets.find(a => a.symbol === asset.symbol)?.icon}
+                      <div className="mr-3">
+                        <CryptoIcon 
+                          symbol={asset.symbol}
+                          name={asset.name}
+                          coinGeckoId={assets.find(a => a.symbol === asset.symbol)?.coinGeckoId}
+                          iconUrl={assets.find(a => a.symbol === asset.symbol)?.icon}
+                          size="lg"
+                        />
                       </div>
                       <div>
                         <div className="text-sm font-medium text-gray-900">{asset.name}</div>
