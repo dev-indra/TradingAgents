@@ -13,11 +13,17 @@ DEFAULT_CONFIG = {
     "trading_mode": "crypto",  # "stocks" or "crypto"
     "base_currency": "USDT",  # Base currency for crypto trading
     
-    # LLM settings - Updated for OpenRouter
-    "llm_provider": "openrouter",
-    "deep_think_llm": "anthropic/claude-3.5-sonnet",
-    "quick_think_llm": "openai/gpt-4o-mini",
+    # LLM settings - Support for multiple providers
+    "llm_provider": os.getenv("LLM_PROVIDER", "openrouter"),  # "openrouter", "lmstudio", or "openai"
+    "deep_think_llm": os.getenv("DEEP_THINK_LLM", "anthropic/claude-3.5-sonnet"),
+    "quick_think_llm": os.getenv("QUICK_THINK_LLM", "openai/gpt-4o-mini"),
     "backend_url": "https://openrouter.ai/api/v1",
+    
+    # LM Studio settings for local models
+    "lmstudio_base_url": os.getenv("LMSTUDIO_BASE_URL", "http://192.168.0.33:1234/v1"),
+    "lmstudio_api_key": os.getenv("LMSTUDIO_API_KEY", "lm-studio"),
+    "lmstudio_model_name": os.getenv("LMSTUDIO_MODEL_NAME", None),  # Auto-detect if None
+    "lmstudio_timeout": int(os.getenv("LMSTUDIO_TIMEOUT", "300")),
     
     # MCP Server settings
     "use_mcp_servers": True,

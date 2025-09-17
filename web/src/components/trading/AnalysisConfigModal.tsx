@@ -33,7 +33,7 @@ const modelOptions = {
 }
 
 export default function AnalysisConfigModal({ isOpen, onClose, onSubmit }: AnalysisConfigModalProps) {
-  const [ticker, setTicker] = useState('SPY')
+  const [ticker, setTicker] = useState('')
   const [analysisDate, setAnalysisDate] = useState(new Date().toISOString().split('T')[0])
   const [selectedAnalysts, setSelectedAnalysts] = useState<string[]>(['market', 'social', 'news', 'fundamentals'])
   const [researchDepth, setResearchDepth] = useState(3)
@@ -111,7 +111,7 @@ export default function AnalysisConfigModal({ isOpen, onClose, onSubmit }: Analy
               <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                 <div className="flex items-center justify-between mb-6">
                   <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
-                    Configure Trading Analysis
+                    Configure AI Report
                   </Dialog.Title>
                   <button
                     onClick={onClose}
@@ -133,7 +133,7 @@ export default function AnalysisConfigModal({ isOpen, onClose, onSubmit }: Analy
                         value={ticker}
                         onChange={(e) => setTicker(e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="SPY"
+                        placeholder="Enter ticker (e.g., BTC, ETH, SOL)"
                         required
                       />
                     </div>

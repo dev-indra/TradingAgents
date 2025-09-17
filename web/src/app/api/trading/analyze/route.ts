@@ -171,15 +171,15 @@ async function simulateAnalysis(sessionId: string, request: AnalysisRequest) {
   
   state.report_sections.market_report = `# Market Analysis for ${request.ticker}
 
-Based on comprehensive data retrieved for ${request.ticker} from May 6, 2024, to June 5, 2025, here is a detailed analysis:
+Based on comprehensive data retrieved for ${request.ticker} as of ${request.analysis_date}, here is a detailed analysis:
 
 ## Trend Analysis:
-- **Moving Averages (50 SMA and 200 SMA):** The 50 SMA has been gradually increasing from approximately 554.59 to 562.48, indicating a steady medium-term upward trend.
-- **MACD:** The MACD value has increased but not directly provided but inferred from the VWAP (Volume Weighted Average Price) suggests increasing momentum.
+- **Moving Averages:** Analyzing recent price action and momentum indicators for ${request.ticker}
+- **Technical Indicators:** Current technical setup shows varying signals based on timeframe analysis
 
 ## Market Conditions:
-- The market exhibits a steady upward trend with strong momentum confirmed by MACD and RSI.
-- Current position relative to both the 50- and 200-day moving averages suggests sustained bullish momentum.
+- Recent price action for ${request.ticker} shows market-specific dynamics
+- Volume and momentum patterns indicate current market sentiment for this asset
 `
   
   state.agent_status["Market Analyst"] = "completed"
@@ -199,13 +199,14 @@ Based on comprehensive data retrieved for ${request.ticker} from May 6, 2024, to
     
     await delay(2000)
     
-    state.report_sections.sentiment_report = `# Social Sentiment Analysis
+    state.report_sections.sentiment_report = `# Social Sentiment Analysis for ${request.ticker}
 
-Over the past week (May 29 to June 5, 2025), discussions on social media platforms have highlighted the interplay between SPY and Tesla Inc. (TSLA).
+Based on recent social media activity and sentiment analysis for ${request.ticker}:
 
-## Reddit Activity:
-- Recent data shows a contraction in the U.S. services sector for May, the first in nearly a year, alongside signs of slowing labor market growth.
-- Technical analysis suggests SPY remains in a bullish trend, with some analysts recommending buying on dips.
+## Community Sentiment:
+- Social media discussions showing mixed sentiment regarding ${request.ticker}
+- Recent market dynamics have influenced retail investor perception
+- Technical analysis discussions suggest varying opinions on current trend direction
 `
     
     state.agent_status["Social Analyst"] = "completed"
@@ -224,18 +225,50 @@ Over the past week (May 29 to June 5, 2025), discussions on social media platfor
     
     await delay(2000)
     
-    state.report_sections.news_report = `# Comprehensive Analysis Report for SPDR S&P 500 ETF Trust (SPY) – Week Ending June 5, 2025
+    state.report_sections.news_report = `# News Analysis Report for ${request.ticker} – ${request.analysis_date}
 
-## Macroeconomic Environment:
-- **U.S. Economy:** Recent data shows a contraction in the U.S. services sector for May, the first in nearly a year, alongside signs of slowing labor market growth.
-- **Global Disinflation:** below-target inflation globally, with recent inflows of approximately $2.6 billion.
+## Recent News Impact:
+- Latest news developments affecting ${request.ticker} and related market sectors
+- Regulatory and industry-specific updates relevant to this asset
 
 ## Market Performance:
-- Despite mixed economic signals, global equity markets, including U.S. indices, have reached record highs.
+- Recent performance metrics for ${request.ticker} in context of broader market conditions
+- Key events and announcements impacting price action and investor sentiment
 `
     
     state.agent_status["News Analyst"] = "completed"
     state.current_report = state.report_sections.news_report
+    await delay(1000)
+  }
+  
+  // Fundamentals Analyst
+  if (request.analysts.includes('fundamentals')) {
+    state.agent_status["Fundamentals Analyst"] = "in_progress"
+    state.messages.push({
+      timestamp: new Date().toLocaleTimeString('en-US', { hour12: false }),
+      type: 'Reasoning',
+      content: `Fundamentals Analyst: Analyzing fundamental metrics for ${request.ticker}...`
+    })
+    
+    await delay(2000)
+    
+    state.report_sections.fundamentals_report = `# Fundamental Analysis for ${request.ticker}
+
+Based on fundamental analysis of ${request.ticker} as of ${request.analysis_date}:
+
+## Financial Metrics:
+- Analyzing key performance indicators and valuation metrics for ${request.ticker}
+- Revenue growth trends and profitability analysis
+- Balance sheet strength and financial health indicators
+
+## Valuation Assessment:
+- Current valuation levels relative to historical norms and peer comparison
+- Intrinsic value considerations based on fundamental factors
+- Risk-adjusted return potential for ${request.ticker}
+`
+    
+    state.agent_status["Fundamentals Analyst"] = "completed"
+    state.current_report = state.report_sections.fundamentals_report
     await delay(1000)
   }
   
@@ -246,22 +279,22 @@ Over the past week (May 29 to June 5, 2025), discussions on social media platfor
   
   await delay(3000)
   
-  state.report_sections.investment_plan = `# Research Team Decision
+  state.report_sections.investment_plan = `# Research Team Decision for ${request.ticker}
 
 ## Bull Researcher Analysis
-The Bull Researcher presents a compelling case for SPY based on:
-- Strong technical momentum with moving averages trending upward
-- Fed rate cut expectations providing tailwinds
-- Continued institutional inflows supporting price action
+The Bull Researcher presents a compelling case for ${request.ticker} based on:
+- Current technical momentum and trend analysis
+- Favorable market conditions and catalysts
+- Positive fundamental factors supporting the asset
 
 ## Bear Researcher Analysis  
-The Bear Researcher highlights potential risks:
-- Services sector contraction signaling economic slowdown
-- Elevated valuations increasing vulnerability to corrections
-- Geopolitical tensions creating uncertainty
+The Bear Researcher highlights potential risks for ${request.ticker}:
+- Technical resistance levels and overbought conditions
+- Market headwinds and potential negative catalysts
+- Risk factors specific to this asset class
 
 ## Research Manager Decision
-After careful consideration of both perspectives, the Research Manager recommends a **moderate bullish** position with risk management protocols.
+After careful consideration of both perspectives, the Research Manager recommends a **balanced approach** with appropriate risk management protocols for ${request.ticker}.
 `
 
   state.agent_status["Bull Researcher"] = "completed"
@@ -272,49 +305,72 @@ After careful consideration of both perspectives, the Research Manager recommend
   
   await delay(2000)
   
+  // Risk Management Team analysis
+  state.agent_status["Risky Analyst"] = "in_progress"
+  state.agent_status["Neutral Analyst"] = "in_progress"
+  state.agent_status["Safe Analyst"] = "in_progress"
+  
+  state.messages.push({
+    timestamp: new Date().toLocaleTimeString('en-US', { hour12: false }),
+    type: 'Reasoning',
+    content: `Risk Management Team: Analyzing risk profiles and position sizing for ${request.ticker}...`
+  })
+  
+  await delay(2000)
+  
+  state.agent_status["Risky Analyst"] = "completed"
+  state.agent_status["Neutral Analyst"] = "completed"
+  state.agent_status["Safe Analyst"] = "completed"
+  
+  state.messages.push({
+    timestamp: new Date().toLocaleTimeString('en-US', { hour12: false }),
+    type: 'Reasoning',
+    content: `Risk Management Team: Completed risk assessment for ${request.ticker}`
+  })
+  
+  await delay(1000)
+  
   // Portfolio Manager final decision
   state.agent_status["Portfolio Manager"] = "in_progress"
   
   await delay(2000)
   
-  state.report_sections.final_trade_decision = `# Portfolio Management Decision
+  state.report_sections.final_trade_decision = `# Portfolio Management Decision for ${request.ticker}
 
-## Recommendation: Sell (trim SPY exposure by ~25-30%)
+## Recommendation: Balanced Position Management
 
 ### Summary of Key Arguments
 
 **Risky Analyst (Bull):**
-- Price is above both the 50- and 200-day SMAs, MACD is positive and rising, and RSI at 64.35 is comfortably below overbought.
-- Fed cuts priced in, global disinflation and weaker dollar are tailwinds that can fuel multiple expansion.
-- Recent $2.6 billion inflows into SPY underscore ongoing investor confidence.
+- Technical indicators show favorable momentum for ${request.ticker}
+- Current market conditions support continued price appreciation
+- Fundamental factors remain supportive for this asset
 
 **Safe Analyst (Bear):**  
-- Services sector contraction and slowing labor market growth signal a real economic slowdown that will pressure corporate earnings.
-- SPY's 25% P/E is above long-term averages, with pockets at 32.46% heightening vulnerability to corrections.
-- Geopolitical tensions and speculative social-media froth can trigger sudden reversals; capital preservation through bonds, cash, and hedges is prudent.
+- Risk factors suggest caution with current ${request.ticker} exposure
+- Market conditions show potential headwinds ahead
+- Valuation concerns warrant defensive positioning
 
 **Neutral Analyst (Balanced):**
-Both the Risky and Safe Analysts bring valid points to the table, but each leans too far in their respective directions, which could lead to suboptimal outcomes if...
+Both the Risky and Safe Analysts present valid perspectives. A balanced approach considers both upside potential and downside protection for ${request.ticker}.
 
-### Rationale for a Moderate Sell
+### Rationale for Balanced Approach
 
-We agree with the Safe Analyst that "elevated valuations increase vulnerability" and with the Risky Analyst that strong technicals and expected Fed easing support further upside. The Neutral compromise—trimming 20-30% of SPY—captures gains, yet leaves room to participate if bullish forces persist.
+Considering all analyst input, we recommend a **measured approach** that balances opportunity with risk management for ${request.ticker}.
 
 **Defined Investment Plan:**
 
-**Recommendation:** Sell 25-30% of current SPY holdings this week via limit orders near today's levels.
-**Rationale:** This scaling back locks in partial gains and reduces concentration without forgoing a majority of upside should the technical uptrend and Fed-easing narrative hold.
-**Deployment:** 
-- 50-20% into laddered U.S. Treasuries or high-grade corporates (2-5 year maturities) for yield and ballast.
-- 30-20% in cash or a stable-value fund to maintain powder for tactical redeployment on a 5-8% SPY pullback.
-- 15-20% in a cost-effective put spread (2-3 months out, ~3% below spot) to hedge remaining SPY exposure.
+**Recommendation:** Maintain current ${request.ticker} allocation with tactical adjustments based on market conditions.
+**Rationale:** This approach allows participation in potential upside while maintaining appropriate risk controls.
+**Risk Management:** 
+- Monitor key technical levels and market indicators
+- Implement appropriate position sizing based on portfolio risk tolerance
+- Maintain liquidity for tactical rebalancing opportunities
 
-**Re-Entry Triggers:**
-- SPY falls 5%: Redeploy 25% of cash and cost-effective hedges.
-- SPY falls 8%: Redeploy 50% of cash.
-- A dovish pivot from the Fed accompanied by stronger ISM/non-jobs data: Consider full redeployment.
-
-On any trigger, redeploy gradually across 2-4 trading sessions to avoid single-day concentration risks.
+**Adjustment Triggers:**
+- Technical breakout: Consider increasing allocation
+- Risk-off conditions: Reduce exposure appropriately
+- Fundamental changes: Reassess position based on new information
 `
 
   state.agent_status["Portfolio Manager"] = "completed"

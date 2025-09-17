@@ -384,5 +384,19 @@ async def analyze_crypto_news_sentiment(symbol: str, days: int = 7) -> Dict[str,
         }
 
 if __name__ == "__main__":
+    # Create a simple HTTP wrapper around MCP server
+    from fastapi import FastAPI
     import uvicorn
-    uvicorn.run(mcp.app, host="0.0.0.0", port=9001)
+    
+    app = FastAPI()
+    
+    @app.get("/health")
+    async def health_check():
+        return {"status": "healthy", "message": "Crypto News MCP Server is running"}
+    
+    @app.get("/")
+    async def root():
+        return {"name": "CryptoNewsServer", "version": "1.0", "status": "running"}
+    
+    # Run the HTTP server
+    uvicorn.run(app, host="0.0.0.0", port=9001)

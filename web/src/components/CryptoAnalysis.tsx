@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { PlayIcon, StopIcon } from '@heroicons/react/24/solid'
-import { ClockIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
+import { ClockIcon, CheckCircleIcon, XCircleIcon, HomeIcon, CloudIcon, CpuChipIcon } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
+import CryptoIcon from './CryptoIcon'
+import { useLLMProvider } from '@/context/LLMProviderContext'
 
 interface Crypto {
   symbol: string
@@ -23,6 +25,11 @@ interface AnalysisResult {
   confidence: number
   reasoning: string
   timestamp: string
+  llmProvider: {
+    id: string
+    name: string
+    cost: 'free' | 'paid'
+  }
   agents: {
     market: string
     news: string
@@ -32,11 +39,23 @@ interface AnalysisResult {
 }
 
 export default function CryptoAnalysis({ cryptos, selectedCrypto, onCryptoSelect }: CryptoAnalysisProps) {
+  const { selectedProvider, getCurrentProvider, isConnected } = useLLMProvider()
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([])
   const [analysisLogs, setAnalysisLogs] = useState<string[]>([])
 
   const startAnalysis = async (symbol: string) => {
+    const currentProvider = getCurrentProvider()
+    if (!currentProvider) {
+      toast.error('No LLM provider selected')
+      return
+    }
+
+    if (!isConnected(selectedProvider)) {
+      toast.error(`${currentProvider.name} is not connected. Please check your configuration.`)
+      return
+    }
+
     setIsAnalyzing(true)
     setAnalysisLogs([])
     
@@ -50,6 +69,7 @@ export default function CryptoAnalysis({ cryptos, selectedCrypto, onCryptoSelect
           symbol,
           date: new Date().toISOString().split('T')[0],
           debug: true,
+          llmProvider: selectedProvider, // Include selected provider
         }),
       })
 
@@ -66,6 +86,11 @@ export default function CryptoAnalysis({ cryptos, selectedCrypto, onCryptoSelect
         confidence: result.confidence || 50,
         reasoning: result.reasoning || 'Analysis completed',
         timestamp: new Date().toISOString(),
+        llmProvider: {
+          id: currentProvider.id,
+          name: currentProvider.name,
+          cost: currentProvider.cost,
+        },
         agents: {
           market: result.market_analysis || 'No market analysis',
           news: result.news_analysis || 'No news analysis',
@@ -124,7 +149,31 @@ export default function CryptoAnalysis({ cryptos, selectedCrypto, onCryptoSelect
       {/* Control Panel */}
       <div className="card">
         <div className="card-header">
-          <h2 className="card-title">AI Trading Analysis</h2>
+          <div>
+            <h2 className="card-title">Asset Analysis</h2>
+            <div className="flex items-center space-x-2 mt-2">
+              {getCurrentProvider() && (
+                <>
+                  <div className="flex items-center space-x-2">
+                    {getCurrentProvider()?.id === 'lmstudio' ? <HomeIcon className="h-4 w-4" /> : <CloudIcon className="h-4 w-4" />}
+                    <span className="text-sm text-gray-600">
+                      Using: {getCurrentProvider()?.name}
+                    </span>
+                    {isConnected(selectedProvider) ? (
+                      <CheckCircleIcon className="h-4 w-4 text-success-500" />
+                    ) : (
+                      <XCircleIcon className="h-4 w-4 text-danger-500" />
+                    )}
+                  </div>
+                  {getCurrentProvider()?.cost === 'free' && (
+                    <span className="text-xs bg-success-100 text-success-800 px-2 py-1 rounded-full font-medium">
+                      💰 FREE
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
           <div className="flex items-center space-x-3">
             <button
               onClick={runBatchAnalysis}
@@ -160,7 +209,14 @@ export default function CryptoAnalysis({ cryptos, selectedCrypto, onCryptoSelect
               }`}
             >
               <div className="text-center">
-                <div className="text-2xl mb-1">{crypto.icon}</div>
+                <div className="mb-1 flex justify-center">
+                  <CryptoIcon 
+                    symbol={crypto.symbol}
+                    name={crypto.name}
+                    iconUrl={crypto.icon}
+                    size="lg"
+                  />
+                </div>
                 <div className="text-xs font-medium text-gray-700">{crypto.symbol}</div>
               </div>
             </button>
@@ -196,9 +252,12 @@ export default function CryptoAnalysis({ cryptos, selectedCrypto, onCryptoSelect
             <div key={`${result.symbol}-${result.timestamp}`} className="card">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <div className="text-2xl">
-                    {cryptos.find(c => c.symbol === result.symbol)?.icon || '?'}
-                  </div>
+                  <CryptoIcon 
+                    symbol={result.symbol}
+                    name={cryptos.find(c => c.symbol === result.symbol)?.name}
+                    iconUrl={cryptos.find(c => c.symbol === result.symbol)?.icon}
+                    size="xl"
+                  />
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">
                       {result.symbol} Analysis
@@ -214,6 +273,15 @@ export default function CryptoAnalysis({ cryptos, selectedCrypto, onCryptoSelect
                   </div>
                   <div className="text-sm text-gray-500">
                     Confidence: {result.confidence}%
+                  </div>
+                  <div className="flex items-center justify-end space-x-2 mt-2">
+                    {result.llmProvider.id === 'lmstudio' ? <HomeIcon className="h-4 w-4" /> : <CloudIcon className="h-4 w-4" />}
+                    <span className="text-xs text-gray-500">
+                      {result.llmProvider.name}
+                      {result.llmProvider.cost === 'free' && (
+                        <span className="ml-1 text-success-600 font-medium">FREE</span>
+                      )}
+                    </span>
                   </div>
                 </div>
               </div>

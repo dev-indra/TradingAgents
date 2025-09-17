@@ -36,5 +36,5 @@ ENV TRADINGAGENTS_DATA_DIR=/app/data
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD python -c "import tradingagents; print('OK')" || exit 1
 
-# Default command
-CMD ["python", "-m", "cli.main"]
+# Default command - run in non-interactive mode for Docker
+CMD ["python", "-m", "cli.main", "--non-interactive"]

@@ -731,10 +731,28 @@ def extract_content_string(content):
     else:
         return str(content)
 
+def run_analysis_with_selections(selections):
+    """Run analysis with pre-determined selections (for non-interactive mode)."""
+    # Print selections for logging in non-interactive mode
+    console.print(f"[green]Running analysis with:[/green]")
+    console.print(f"  Ticker: {selections['ticker']}")
+    console.print(f"  Date: {selections['analysis_date']}")
+    console.print(f"  Analysts: {[a.value for a in selections['analysts']]}")
+    console.print(f"  Research Depth: {selections['research_depth']}")
+    console.print(f"  LLM Provider: {selections['llm_provider']}")
+    console.print(f"  Models: {selections['shallow_thinker']} / {selections['deep_thinker']}")
+    console.print()
+    
+    _run_analysis_core(selections)
+
 def run_analysis():
+    """Run analysis with interactive user selections."""
     # First get all user selections
     selections = get_user_selections()
+    _run_analysis_core(selections)
 
+def _run_analysis_core(selections):
+    """Core analysis logic shared by both interactive and non-interactive modes."""
     # Create config with selected research depth
     config = DEFAULT_CONFIG.copy()
     config["max_debate_rounds"] = selections["research_depth"]
@@ -1096,9 +1114,174 @@ def run_analysis():
         update_display(layout)
 
 
+@app.callback(invoke_without_command=True)
+def main(
+    ctx: typer.Context,
+    ticker: str = typer.Option("SPY", help="Ticker symbol to analyze"),
+    date: str = typer.Option(None, help="Analysis date (YYYY-MM-DD), defaults to today"),
+    analysts: str = typer.Option("market,social,news,fundamentals", help="Comma-separated list of analysts"),
+    depth: int = typer.Option(3, help="Research depth (number of debate rounds)"),
+    provider: str = typer.Option("lmstudio", help="LLM provider (openrouter, anthropic, openai, lmstudio)"),
+    backend_url: str = typer.Option(None, help="Backend URL for API calls"),
+    shallow_model: str = typer.Option(None, help="Model for shallow thinking"),
+    deep_model: str = typer.Option(None, help="Model for deep thinking"),
+    non_interactive: bool = typer.Option(False, help="Run in non-interactive mode (for Docker/CI)"),
+):
+    """TradingAgents CLI: Multi-Agents LLM Financial Trading Framework."""
+    if ctx.invoked_subcommand is None:
+        # This is the default behavior when no subcommand is specified
+        if non_interactive:
+            # Non-interactive mode - use provided options or defaults
+            from datetime import datetime
+            from cli.models import AnalystType
+            
+            # Set defaults for non-interactive mode
+            if date is None:
+                date = datetime.now().strftime("%Y-%m-%d")
+                
+            # Parse analysts string into AnalystType enum values
+            analyst_names = [name.strip().lower() for name in analysts.split(",")]
+            selected_analysts = []
+            for name in analyst_names:
+                if name == "market":
+                    selected_analysts.append(AnalystType.MARKET)
+                elif name == "social":
+                    selected_analysts.append(AnalystType.SOCIAL)
+                elif name == "news":
+                    selected_analysts.append(AnalystType.NEWS)
+                elif name == "fundamentals":
+                    selected_analysts.append(AnalystType.FUNDAMENTALS)
+                    
+            # Set default models based on provider
+            if shallow_model is None:
+                if provider.lower() == "openrouter":
+                    shallow_model = "anthropic/claude-3-5-sonnet-20241022"
+                elif provider.lower() == "anthropic":
+                    shallow_model = "claude-3-5-sonnet-20241022"
+                elif provider.lower() == "openai":
+                    shallow_model = "gpt-4o-mini"
+                elif provider.lower() == "lmstudio":
+                    shallow_model = "llama-3.2-3b-instruct"
+                else:
+                    shallow_model = "anthropic/claude-3-5-sonnet-20241022"
+                    
+            if deep_model is None:
+                if provider.lower() == "openrouter":
+                    deep_model = "anthropic/claude-3-5-sonnet-20241022"
+                elif provider.lower() == "anthropic":
+                    deep_model = "claude-3-5-sonnet-20241022"
+                elif provider.lower() == "openai":
+                    deep_model = "gpt-4o"
+                elif provider.lower() == "lmstudio":
+                    deep_model = "llama-3.2-3b-instruct"
+                else:
+                    deep_model = "anthropic/claude-3-5-sonnet-20241022"
+                    
+            if backend_url is None:
+                if provider.lower() == "lmstudio":
+                    backend_url = "http://host.docker.internal:1234"
+                else:
+                    backend_url = ""
+            
+            selections = {
+                "ticker": ticker,
+                "analysis_date": date,
+                "analysts": selected_analysts,
+                "research_depth": depth,
+                "llm_provider": provider.lower(),
+                "backend_url": backend_url,
+                "shallow_thinker": shallow_model,
+                "deep_thinker": deep_model,
+            }
+            
+            # Run the analysis directly with these selections
+            run_analysis_with_selections(selections)
+        else:
+            # Interactive mode - use the existing UI
+            run_analysis()
+
 @app.command()
-def analyze():
-    run_analysis()
+def analyze(
+    ticker: str = typer.Option("SPY", help="Ticker symbol to analyze"),
+    date: str = typer.Option(None, help="Analysis date (YYYY-MM-DD), defaults to today"),
+    analysts: str = typer.Option("market,social,news,fundamentals", help="Comma-separated list of analysts"),
+    depth: int = typer.Option(3, help="Research depth (number of debate rounds)"),
+    provider: str = typer.Option("lmstudio", help="LLM provider (openrouter, anthropic, openai, lmstudio)"),
+    backend_url: str = typer.Option(None, help="Backend URL for API calls"),
+    shallow_model: str = typer.Option(None, help="Model for shallow thinking"),
+    deep_model: str = typer.Option(None, help="Model for deep thinking"),
+    non_interactive: bool = typer.Option(False, help="Run in non-interactive mode (for Docker/CI)"),
+):
+    """Run trading analysis with command-line options or interactive prompts."""
+    if non_interactive:
+        # Non-interactive mode - use provided options or defaults
+        from datetime import datetime
+        from cli.models import AnalystType
+        
+        # Set defaults for non-interactive mode
+        if date is None:
+            date = datetime.now().strftime("%Y-%m-%d")
+            
+        # Parse analysts string into AnalystType enum values
+        analyst_names = [name.strip().lower() for name in analysts.split(",")]
+        selected_analysts = []
+        for name in analyst_names:
+            if name == "market":
+                selected_analysts.append(AnalystType.MARKET)
+            elif name == "social":
+                selected_analysts.append(AnalystType.SOCIAL)
+            elif name == "news":
+                selected_analysts.append(AnalystType.NEWS)
+            elif name == "fundamentals":
+                selected_analysts.append(AnalystType.FUNDAMENTALS)
+                
+        # Set default models based on provider
+        if shallow_model is None:
+            if provider.lower() == "openrouter":
+                shallow_model = "anthropic/claude-3-5-sonnet-20241022"
+            elif provider.lower() == "anthropic":
+                shallow_model = "claude-3-5-sonnet-20241022"
+            elif provider.lower() == "openai":
+                shallow_model = "gpt-4o-mini"
+            elif provider.lower() == "lmstudio":
+                shallow_model = "llama-3.2-3b-instruct"
+            else:
+                shallow_model = "anthropic/claude-3-5-sonnet-20241022"
+                
+        if deep_model is None:
+            if provider.lower() == "openrouter":
+                deep_model = "anthropic/claude-3-5-sonnet-20241022"
+            elif provider.lower() == "anthropic":
+                deep_model = "claude-3-5-sonnet-20241022"
+            elif provider.lower() == "openai":
+                deep_model = "gpt-4o"
+            elif provider.lower() == "lmstudio":
+                deep_model = "llama-3.2-3b-instruct"
+            else:
+                deep_model = "anthropic/claude-3-5-sonnet-20241022"
+                
+        if backend_url is None:
+            if provider.lower() == "lmstudio":
+                backend_url = "http://host.docker.internal:1234"
+            else:
+                backend_url = ""
+        
+        selections = {
+            "ticker": ticker,
+            "analysis_date": date,
+            "analysts": selected_analysts,
+            "research_depth": depth,
+            "llm_provider": provider.lower(),
+            "backend_url": backend_url,
+            "shallow_thinker": shallow_model,
+            "deep_thinker": deep_model,
+        }
+        
+        # Run the analysis directly with these selections
+        run_analysis_with_selections(selections)
+    else:
+        # Interactive mode - use the existing UI
+        run_analysis()
 
 
 if __name__ == "__main__":

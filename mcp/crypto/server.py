@@ -122,7 +122,12 @@ class CryptoDataProvider:
                 "limit": 100
             }
             
-            async with self.session.get(url, params=params) as response:
+            # Add headers if API key is available
+            headers = {}
+            if self.binance_api_key:
+                headers["X-MBX-APIKEY"] = self.binance_api_key
+            
+            async with self.session.get(url, params=params, headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
                     return {
@@ -136,6 +141,91 @@ class CryptoDataProvider:
                     return {}
         except Exception as e:
             logger.error(f"Error fetching order book: {e}")
+            return {}
+
+    async def get_binance_market_data(self, symbol: str) -> Dict[str, Any]:
+        """Get real-time market data from Binance"""
+        try:
+            # Convert symbol to Binance format
+            binance_symbol = f"{symbol.upper()}USDT"
+            
+            # Get 24hr ticker statistics
+            url = f"https://api.binance.com/api/v3/ticker/24hr"
+            params = {"symbol": binance_symbol}
+            
+            # Add headers if API key is available
+            headers = {}
+            if self.binance_api_key:
+                headers["X-MBX-APIKEY"] = self.binance_api_key
+            
+            async with self.session.get(url, params=params, headers=headers) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return {
+                        "symbol": symbol.upper(),
+                        "current_price": float(data.get("lastPrice", 0)),
+                        "price_change_24h": float(data.get("priceChange", 0)),
+                        "price_change_percentage_24h": float(data.get("priceChangePercent", 0)),
+                        "high_24h": float(data.get("highPrice", 0)),
+                        "low_24h": float(data.get("lowPrice", 0)),
+                        "volume_24h": float(data.get("volume", 0)),
+                        "volume_24h_usd": float(data.get("quoteVolume", 0)),
+                        "bid_price": float(data.get("bidPrice", 0)),
+                        "ask_price": float(data.get("askPrice", 0)),
+                        "timestamp": data.get("closeTime")
+                    }
+                else:
+                    logger.error(f"Binance API error: {response.status}")
+                    return {}
+        except Exception as e:
+            logger.error(f"Error fetching Binance market data: {e}")
+            return {}
+
+    async def get_batch_market_data(self, symbols: List[str]) -> Dict[str, Any]:
+        """Get market data for multiple cryptocurrencies"""
+        try:
+            # Use CoinGecko for batch data (more efficient)
+            symbol_ids = [await self._get_coingecko_id(symbol) for symbol in symbols]
+            
+            url = "https://api.coingecko.com/api/v3/coins/markets"
+            params = {
+                "vs_currency": "usd",
+                "ids": ",".join(symbol_ids),
+                "order": "market_cap_desc",
+                "per_page": len(symbols),
+                "page": 1,
+                "sparkline": "false"
+            }
+            
+            if self.coingecko_api_key:
+                params["x_cg_demo_api_key"] = self.coingecko_api_key
+            
+            async with self.session.get(url, params=params) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    result = {}
+                    
+                    for coin in data:
+                        symbol = coin.get("symbol", "").upper()
+                        result[symbol] = {
+                            "symbol": symbol,
+                            "name": coin.get("name", ""),
+                            "current_price": coin.get("current_price"),
+                            "market_cap": coin.get("market_cap"),
+                            "total_volume": coin.get("total_volume"),
+                            "price_change_24h": coin.get("price_change_24h"),
+                            "price_change_percentage_24h": coin.get("price_change_percentage_24h"),
+                            "market_cap_rank": coin.get("market_cap_rank"),
+                            "image": coin.get("image"),
+                            "last_updated": coin.get("last_updated")
+                        }
+                    
+                    return {"markets": result, "count": len(result)}
+                else:
+                    logger.error(f"CoinGecko batch API error: {response.status}")
+                    return {}
+        except Exception as e:
+            logger.error(f"Error fetching batch market data: {e}")
             return {}
 
     async def _get_coingecko_id(self, symbol: str) -> str:
@@ -219,6 +309,43 @@ async def get_crypto_orderbook(symbol: str) -> Dict[str, Any]:
         return await provider.get_binance_orderbook(symbol)
 
 @mcp.tool()
+async def get_binance_market_data(symbol: str) -> Dict[str, Any]:
+    """
+    Get real-time market data from Binance (more accurate than CoinGecko)
+    
+    Args:
+        symbol: Cryptocurrency symbol (e.g., BTC, ETH)
+    
+    Returns:
+        Dictionary containing Binance market data with bid/ask prices and volumes
+    """
+    global crypto_provider
+    if crypto_provider is None:
+        crypto_provider = CryptoDataProvider()
+    
+    async with crypto_provider as provider:
+        return await provider.get_binance_market_data(symbol)
+
+@mcp.tool()
+async def get_batch_market_data(symbols: str) -> Dict[str, Any]:
+    """
+    Get market data for multiple cryptocurrencies at once
+    
+    Args:
+        symbols: Comma-separated cryptocurrency symbols (e.g., "BTC,ETH,SOL")
+    
+    Returns:
+        Dictionary containing market data for all requested symbols
+    """
+    global crypto_provider
+    if crypto_provider is None:
+        crypto_provider = CryptoDataProvider()
+    
+    symbol_list = [s.strip().upper() for s in symbols.split(",")]
+    async with crypto_provider as provider:
+        return await provider.get_batch_market_data(symbol_list)
+
+@mcp.tool()
 async def calculate_crypto_indicators(symbol: str, days: int = 30) -> Dict[str, Any]:
     """
     Calculate technical indicators for a cryptocurrency
@@ -276,5 +403,19 @@ async def calculate_crypto_indicators(symbol: str, days: int = 30) -> Dict[str, 
         }
 
 if __name__ == "__main__":
+    # Create a simple HTTP wrapper around MCP server
+    from fastapi import FastAPI
     import uvicorn
-    uvicorn.run(mcp.app, host="0.0.0.0", port=9000)
+    
+    app = FastAPI()
+    
+    @app.get("/health")
+    async def health_check():
+        return {"status": "healthy", "message": "Crypto MCP Server is running"}
+    
+    @app.get("/")
+    async def root():
+        return {"name": "CryptoDataServer", "version": "1.0", "status": "running"}
+    
+    # Run the HTTP server
+    uvicorn.run(app, host="0.0.0.0", port=9000)

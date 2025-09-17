@@ -9,6 +9,7 @@ import aiohttp
 from typing import Dict, Any, List, Optional
 from langchain.tools import Tool
 from langchain_core.tools import tool
+from tradingagents.utils.redis_client import get_redis_client, cached_function, cache_key_builder
 
 logger = logging.getLogger(__name__)
 
@@ -30,13 +31,31 @@ class MCPCryptoClient:
             await self.session.close()
     
     async def call_mcp_tool(self, server_url: str, tool_name: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """Call a tool on an MCP server"""
+        """Call a tool on an MCP server with Redis caching"""
+        # Build cache key
+        cache_key = f"mcp:{tool_name}:{cache_key_builder(server_url, **parameters)}"
+        
+        # Try to get from cache first
+        redis_client = get_redis_client(self.config)
+        cached_result = redis_client.get(cache_key)
+        
+        if cached_result is not None:
+            logger.debug(f"Cache hit for MCP tool {tool_name}")
+            return cached_result
+        
         try:
             url = f"{server_url}/tools/{tool_name}"
             
             async with self.session.post(url, json=parameters) as response:
                 if response.status == 200:
-                    return await response.json()
+                    result = await response.json()
+                    
+                    # Cache the result with appropriate TTL
+                    ttl = self._get_cache_ttl(tool_name)
+                    redis_client.set(cache_key, result, ttl)
+                    logger.debug(f"Cached MCP tool {tool_name} result for {ttl}s")
+                    
+                    return result
                 else:
                     error_text = await response.text()
                     logger.error(f"MCP server error ({response.status}): {error_text}")
@@ -44,6 +63,29 @@ class MCPCryptoClient:
         except Exception as e:
             logger.error(f"Error calling MCP tool {tool_name}: {e}")
             return {"error": str(e)}
+    
+    def _get_cache_ttl(self, tool_name: str) -> int:
+        """Get appropriate cache TTL based on tool type"""
+        # Different cache TTLs for different types of data
+        cache_durations = {
+            # Price data changes frequently - shorter cache
+            "get_crypto_price_data": 60,  # 1 minute
+            "get_crypto_market_data": 30,  # 30 seconds
+            "get_crypto_orderbook": 10,   # 10 seconds
+            
+            # Indicators can be cached a bit longer
+            "calculate_crypto_indicators": 300,  # 5 minutes
+            
+            # News and sentiment change less frequently
+            "get_crypto_news": 900,  # 15 minutes
+            "get_crypto_social_sentiment": 600,  # 10 minutes
+            "analyze_crypto_news_sentiment": 900,  # 15 minutes
+            
+            # Fear/Greed index updates daily
+            "get_market_fear_greed_index": 3600,  # 1 hour
+        }
+        
+        return cache_durations.get(tool_name, self.config.get("cache_ttl", 300))
 
 # Global MCP client instance
 mcp_client = None

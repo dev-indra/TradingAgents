@@ -113,95 +113,17 @@ export default function Dashboard() {
 
   const tabs = [
     { id: 'overview', name: 'Market Overview', icon: ChartBarIcon },
-    { id: 'analysis', name: 'AI Analysis', icon: ChatBubbleLeftRightIcon },
-    { id: 'trading', name: 'Trading Analysis', icon: CommandLineIcon },
+    { id: 'analysis', name: 'Asset Analysis', icon: ChatBubbleLeftRightIcon },
+    { id: 'trading', name: 'AI Report', icon: CommandLineIcon },
     { id: 'news', name: 'News & Sentiment', icon: NewspaperIcon },
     { id: 'portfolio', name: 'Portfolio', icon: CurrencyDollarIcon },
   ]
 
-  // Handle Trading Analysis tab differently as it needs full height
-  if (activeTab === 'trading') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        <ProviderStatusNotification />
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 flex-shrink-0">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              {/* Logo */}
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-gradient-to-r from-crypto-500 to-crypto-600 rounded-lg flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">TA</span>
-                    </div>
-                    <div>
-                      <h1 className="text-xl font-bold bg-gradient-to-r from-crypto-600 to-purple-600 bg-clip-text text-transparent">TradingAgents</h1>
-                      <p className="text-xs text-gray-500">Crypto AI Analysis</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* LLM Provider Selector */}
-              <div className="flex-1 flex justify-center">
-                <LLMProviderSelector
-                  selectedProvider={selectedProvider}
-                  onProviderChange={setSelectedProvider}
-                  providers={providers}
-                  onTestConnection={testConnection}
-                  onConfigureProvider={handleConfigureProvider}
-                />
-              </div>
-
-              {/* System Status */}
-              <SystemStatus health={systemHealth} />
-            </div>
-          </div>
-        </header>
-
-        {/* Navigation Tabs */}
-        <div className="bg-white border-b border-gray-200 flex-shrink-0">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <nav className="-mb-px flex space-x-8">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
-                    activeTab === tab.id
-                      ? 'border-crypto-500 text-crypto-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <tab.icon className="h-5 w-5" />
-                  <span>{tab.name}</span>
-                </button>
-              ))}
-            </nav>
-          </div>
-        </div>
-
-        {/* Trading Dashboard - Full Height */}
-        <div className="flex-1 overflow-hidden">
-          <TradingDashboard onBack={() => setActiveTab('overview')} />
-        </div>
-        
-        {/* Configuration Modal */}
-        <ProviderConfigModal
-          isOpen={configModalOpen}
-          onClose={() => setConfigModalOpen(false)}
-          providerId={configProviderId}
-        />
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <ProviderStatusNotification />
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-white border-b border-gray-200 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -236,98 +158,98 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Navigation Tabs */}
-        <div className="mb-8">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
-                    activeTab === tab.id
-                      ? 'border-crypto-500 text-crypto-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <tab.icon className="h-5 w-5" />
-                  <span>{tab.name}</span>
-                </button>
-              ))}
-            </nav>
-          </div>
-        </div>
-
-        {/* Tab Content */}
-        <div className="space-y-8">
-          {portfolioLoading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-crypto-600 mx-auto mb-4"></div>
-              <p className="text-gray-500">Loading your portfolio...</p>
-            </div>
-          ) : assets.length === 0 ? (
-            <div className="text-center py-12">
-              <CurrencyDollarIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Portfolio Assets</h3>
-              <p className="text-gray-500 mb-4">Add crypto assets to your portfolio to start analyzing.</p>
+      {/* Navigation Tabs */}
+      <div className="bg-white border-b border-gray-200 flex-shrink-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="-mb-px flex space-x-8">
+            {tabs.map((tab) => (
               <button
-                onClick={() => setActiveTab('portfolio')}
-                className="btn-primary"
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                  activeTab === tab.id
+                    ? 'border-crypto-500 text-crypto-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
               >
-                Manage Portfolio
+                <tab.icon className="h-5 w-5" />
+                <span>{tab.name}</span>
               </button>
-            </div>
-          ) : (
-            <>
-              {activeTab === 'overview' && (
-                <MarketOverview 
-                  cryptos={assets.map(asset => ({ 
-                    symbol: asset.symbol, 
-                    name: asset.name, 
-                    icon: asset.icon 
-                  }))}
-                  onCryptoSelect={setSelectedCrypto}
-                  selectedCrypto={selectedCrypto}
-                />
-              )}
-
-          {activeTab === 'analysis' && (
-            <CryptoAnalysis
-              cryptos={assets.map(asset => ({ 
-                symbol: asset.symbol, 
-                name: asset.name, 
-                icon: asset.icon 
-              }))}
-              selectedCrypto={selectedCrypto}
-              onCryptoSelect={setSelectedCrypto}
-            />
-          )}
-
-          {activeTab === 'trading' && (
-            <div className="h-screen">
-              <TradingDashboard onBack={() => setActiveTab('overview')} />
-            </div>
-          )}
-
-          {activeTab === 'news' && (
-            <NewsPanel 
-              cryptos={assets.map(asset => ({ 
-                symbol: asset.symbol, 
-                name: asset.name, 
-                icon: asset.icon 
-              }))}
-              selectedCrypto={selectedCrypto}
-              onCryptoSelect={setSelectedCrypto}
-            />
-          )}
-
-              {activeTab === 'portfolio' && (
-                <PortfolioManager />
-              )}
-            </>
-          )}
+            ))}
+          </nav>
         </div>
+      </div>
+
+      {/* Tab Content */}
+      <div className={`flex-1 ${activeTab === 'trading' ? 'overflow-hidden' : 'overflow-auto'}`}>
+        {activeTab === 'trading' ? (
+          <TradingDashboard onBack={() => setActiveTab('overview')} />
+        ) : (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="space-y-8">
+              {portfolioLoading ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-crypto-600 mx-auto mb-4"></div>
+                  <p className="text-gray-500">Loading your portfolio...</p>
+                </div>
+              ) : assets.length === 0 && activeTab !== 'trading' ? (
+                <div className="text-center py-12">
+                  <CurrencyDollarIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Portfolio Assets</h3>
+                  <p className="text-gray-500 mb-4">Add crypto assets to your portfolio to start analyzing.</p>
+                  <button
+                    onClick={() => setActiveTab('portfolio')}
+                    className="btn-primary"
+                  >
+                    Manage Portfolio
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {activeTab === 'overview' && (
+                    <MarketOverview 
+                      cryptos={assets.map(asset => ({ 
+                        symbol: asset.symbol, 
+                        name: asset.name, 
+                        icon: asset.icon 
+                      }))}
+                      onCryptoSelect={setSelectedCrypto}
+                      selectedCrypto={selectedCrypto}
+                    />
+                  )}
+
+                  {activeTab === 'analysis' && (
+                    <CryptoAnalysis
+                      cryptos={assets.map(asset => ({ 
+                        symbol: asset.symbol, 
+                        name: asset.name, 
+                        icon: asset.icon 
+                      }))}
+                      selectedCrypto={selectedCrypto}
+                      onCryptoSelect={setSelectedCrypto}
+                    />
+                  )}
+
+                  {activeTab === 'news' && (
+                    <NewsPanel 
+                      cryptos={assets.map(asset => ({ 
+                        symbol: asset.symbol, 
+                        name: asset.name, 
+                        icon: asset.icon 
+                      }))}
+                      selectedCrypto={selectedCrypto}
+                      onCryptoSelect={setSelectedCrypto}
+                    />
+                  )}
+
+                  {activeTab === 'portfolio' && (
+                    <PortfolioManager />
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Configuration Modal */}

@@ -9,9 +9,21 @@ def main():
     # Default config is now set up for crypto and OpenRouter
     config = DEFAULT_CONFIG.copy()
     
-    # Override for demo purposes - use cost-effective models
-    config["deep_think_llm"] = "openai/gpt-4o-mini"  # More cost effective for demo
-    config["quick_think_llm"] = "openai/gpt-4o-mini" 
+    # Check if user wants to use LM Studio (local models)
+    use_lmstudio = os.getenv("USE_LMSTUDIO", "false").lower() == "true"
+    
+    if use_lmstudio:
+        # Configure for local LM Studio models - ZERO COST!
+        config["llm_provider"] = "lmstudio"
+        config["deep_think_llm"] = "local-model"  # Uses loaded LM Studio model
+        config["quick_think_llm"] = "local-model"
+        print("🏠 Using LM Studio for local models - ZERO API costs!")
+    else:
+        # Override for demo purposes - use cost-effective cloud models
+        config["deep_think_llm"] = "openai/gpt-4o-mini"  # More cost effective for demo
+        config["quick_think_llm"] = "openai/gpt-4o-mini"
+        print("☁️ Using cloud models - API costs apply")
+    
     config["max_debate_rounds"] = 1
     config["trading_mode"] = "crypto"
     config["use_mcp_servers"] = True
@@ -57,6 +69,11 @@ def main():
     
     print()
     print("💡 Note: This is for research purposes only. Not financial advice.")
+    print()
+    if not use_lmstudio:
+        print("🏠 Want to use FREE local models instead?")
+        print("   Set USE_LMSTUDIO=true or run: python example_lmstudio.py")
+        print("   See LMSTUDIO_SETUP.md for full setup guide")
     
     # Optional: Reflect on performance (uncomment to use)
     # ta.reflect_and_remember(1000)  # parameter is the position returns

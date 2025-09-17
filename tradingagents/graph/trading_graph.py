@@ -15,6 +15,7 @@ from langgraph.prebuilt import ToolNode
 from tradingagents.agents import *
 from tradingagents.default_config import DEFAULT_CONFIG
 from tradingagents.agents.utils.memory import FinancialSituationMemory
+from tradingagents.llm_factory import LLMFactory
 from tradingagents.agents.utils.agent_states import (
     AgentState,
     InvestDebateState,
@@ -57,38 +58,39 @@ class TradingAgentsGraph:
             exist_ok=True,
         )
 
-        # Initialize LLMs
-        if self.config["llm_provider"].lower() == "openrouter":
-            # OpenRouter requires OpenAI API key environment variable
-            api_key = os.getenv("OPENROUTER_API_KEY")
-            if not api_key:
-                raise ValueError("OPENROUTER_API_KEY environment variable is required for OpenRouter")
+        # Initialize LLMs using the factory pattern
+        try:
+            # Validate and normalize configuration
+            self.config = LLMFactory.validate_config(self.config)
             
-            self.deep_thinking_llm = ChatOpenAI(
-                model=self.config["deep_think_llm"], 
-                base_url=self.config["backend_url"],
-                api_key=api_key,
-                extra_headers={"HTTP-Referer": "https://github.com/TauricResearch/TradingAgents"},
-                temperature=0.7
+            # Test provider connection
+            if not LLMFactory.test_provider_connection(self.config):
+                print(f"Warning: Could not connect to {self.config['llm_provider']} provider")
+            
+            # Create LLM instances
+            extra_headers = {}
+            if self.config["llm_provider"].lower() == "openrouter":
+                extra_headers = {"HTTP-Referer": "https://github.com/TauricResearch/TradingAgents"}
+            
+            self.deep_thinking_llm = LLMFactory.create_llm(
+                self.config, 
+                "deep_think", 
+                temperature=0.7,
+                extra_headers=extra_headers
             )
-            self.quick_thinking_llm = ChatOpenAI(
-                model=self.config["quick_think_llm"], 
-                base_url=self.config["backend_url"],
-                api_key=api_key,
-                extra_headers={"HTTP-Referer": "https://github.com/TauricResearch/TradingAgents"},
-                temperature=0.3
+            self.quick_thinking_llm = LLMFactory.create_llm(
+                self.config, 
+                "quick_think", 
+                temperature=0.3,
+                extra_headers=extra_headers
             )
-        elif self.config["llm_provider"].lower() == "openai":
-            self.deep_thinking_llm = ChatOpenAI(model=self.config["deep_think_llm"], base_url=self.config["backend_url"])
-            self.quick_thinking_llm = ChatOpenAI(model=self.config["quick_think_llm"], base_url=self.config["backend_url"])
-        elif self.config["llm_provider"].lower() == "anthropic":
-            self.deep_thinking_llm = ChatAnthropic(model=self.config["deep_think_llm"], base_url=self.config["backend_url"])
-            self.quick_thinking_llm = ChatAnthropic(model=self.config["quick_think_llm"], base_url=self.config["backend_url"])
-        elif self.config["llm_provider"].lower() == "google":
-            self.deep_thinking_llm = ChatGoogleGenerativeAI(model=self.config["deep_think_llm"])
-            self.quick_thinking_llm = ChatGoogleGenerativeAI(model=self.config["quick_think_llm"])
-        else:
-            raise ValueError(f"Unsupported LLM provider: {self.config['llm_provider']}")
+            
+            print(f"✅ Initialized {self.config['llm_provider']} LLMs successfully")
+            if self.config['llm_provider'].lower() == 'lmstudio':
+                print("💰 Using local models - ZERO API costs!")
+            
+        except Exception as e:
+            raise ValueError(f"Failed to initialize LLM provider '{self.config['llm_provider']}': {str(e)}")
         
         self.toolkit = Toolkit(config=self.config)
 

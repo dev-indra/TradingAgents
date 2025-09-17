@@ -15,6 +15,8 @@ interface SystemHealth {
   mcpCrypto: 'healthy' | 'unhealthy' | 'unknown'
   mcpNews: 'healthy' | 'unhealthy' | 'unknown'
   redis: 'healthy' | 'unhealthy' | 'unknown'
+  llmProvider?: 'healthy' | 'unhealthy' | 'unknown'
+  llmProviderName?: string
 }
 
 interface SystemStatusProps {
@@ -25,7 +27,8 @@ const serviceNames = {
   tradingagents: 'Main App',
   mcpCrypto: 'Crypto MCP',
   mcpNews: 'News MCP',
-  redis: 'Redis Cache'
+  redis: 'Redis Cache',
+  llmProvider: 'AI Provider'
 }
 
 const getStatusIcon = (status: string) => {
@@ -88,28 +91,36 @@ export default function SystemStatus({ health }: SystemStatusProps) {
             </div>
             
             <div className="space-y-1 p-2">
-              {Object.entries(health).map(([service, status]) => (
-                <div
-                  key={service}
-                  className="flex items-center justify-between px-2 py-2 rounded-md hover:bg-gray-50"
-                >
-                  <div className="flex items-center space-x-3">
-                    {getStatusIcon(status)}
-                    <span className="text-sm font-medium text-gray-900">
-                      {serviceNames[service as keyof typeof serviceNames]}
+              {Object.entries(health).map(([service, status]) => {
+                // Skip displaying llmProviderName as it's not a status field
+                if (service === 'llmProviderName') return null
+                
+                return (
+                  <div
+                    key={service}
+                    className="flex items-center justify-between px-2 py-2 rounded-md hover:bg-gray-50"
+                  >
+                    <div className="flex items-center space-x-3">
+                      {getStatusIcon(status as string)}
+                      <span className="text-sm font-medium text-gray-900">
+                        {service === 'llmProvider' && health.llmProviderName
+                          ? health.llmProviderName
+                          : serviceNames[service as keyof typeof serviceNames]
+                        }
+                      </span>
+                    </div>
+                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                      status === 'healthy'
+                        ? 'bg-success-100 text-success-800'
+                        : status === 'unhealthy'
+                        ? 'bg-danger-100 text-danger-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {status}
                     </span>
                   </div>
-                  <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                    status === 'healthy'
-                      ? 'bg-success-100 text-success-800'
-                      : status === 'unhealthy'
-                      ? 'bg-danger-100 text-danger-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {status}
-                  </span>
-                </div>
-              ))}
+                )
+              })}
             </div>
             
             <div className="px-4 py-2 border-t border-gray-200">

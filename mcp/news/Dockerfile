@@ -14,7 +14,8 @@ RUN pip install --no-cache-dir \
     feedparser \
     textblob \
     uvicorn \
-    python-dotenv
+    python-dotenv \
+    fastapi
 
 # Download TextBlob corpora
 RUN python -m textblob.download_corpora

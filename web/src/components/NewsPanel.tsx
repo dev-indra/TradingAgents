@@ -1,8 +1,20 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { NewspaperIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline'
+import { 
+  NewspaperIcon, 
+  ChatBubbleLeftRightIcon, 
+  SignalIcon,
+  ChartBarIcon,
+  HeartIcon,
+  FaceSmileIcon,
+  FaceFrownIcon,
+  ExclamationTriangleIcon,
+  ClockIcon,
+  FireIcon
+} from '@heroicons/react/24/outline'
 import useSWR from 'swr'
+import CryptoIcon from './CryptoIcon'
 
 interface Crypto {
   symbol: string
@@ -213,7 +225,14 @@ export default function NewsPanel({ cryptos, selectedCrypto, onCryptoSelect }: N
               }`}
             >
               <div className="text-center">
-                <div className="text-2xl mb-1">{crypto.icon}</div>
+                <div className="mb-1 flex justify-center">
+                  <CryptoIcon 
+                    symbol={crypto.symbol}
+                    name={crypto.name}
+                    iconUrl={crypto.icon}
+                    size="lg"
+                  />
+                </div>
                 <div className="text-xs font-medium text-gray-700">{crypto.symbol}</div>
               </div>
             </button>
@@ -262,12 +281,24 @@ export default function NewsPanel({ cryptos, selectedCrypto, onCryptoSelect }: N
           {/* Overall Sentiment */}
           <div className="card">
             <div className="card-header">
-              <h3 className="card-title">Sentiment Analysis</h3>
+              <div className="flex items-center space-x-2">
+                <SignalIcon className="h-5 w-5 text-crypto-500" />
+                <h3 className="card-title">Sentiment Analysis</h3>
+              </div>
             </div>
             
             {sentimentData && (
               <div className="space-y-4">
                 <div className="text-center">
+                  <div className="flex items-center justify-center mb-2">
+                    {sentimentData.overall_sentiment.score > 0.1 ? (
+                      <FaceSmileIcon className="h-8 w-8 text-success-500" />
+                    ) : sentimentData.overall_sentiment.score < -0.1 ? (
+                      <FaceFrownIcon className="h-8 w-8 text-danger-500" />
+                    ) : (
+                      <ExclamationTriangleIcon className="h-8 w-8 text-gray-500" />
+                    )}
+                  </div>
                   <div className={`text-3xl font-bold ${getSentimentColor(sentimentData.overall_sentiment.score)}`}>
                     {Math.round(sentimentData.overall_sentiment.score * 100)}
                   </div>
@@ -304,7 +335,10 @@ export default function NewsPanel({ cryptos, selectedCrypto, onCryptoSelect }: N
           {/* Fear & Greed Index */}
           <div className="card">
             <div className="card-header">
-              <h3 className="card-title">Fear & Greed Index</h3>
+              <div className="flex items-center space-x-2">
+                <ChartBarIcon className="h-5 w-5 text-indigo-500" />
+                <h3 className="card-title">Fear & Greed Index</h3>
+              </div>
             </div>
             
             {fearGreedIndex && (
@@ -349,7 +383,10 @@ export default function NewsPanel({ cryptos, selectedCrypto, onCryptoSelect }: N
           {/* Quick Stats */}
           <div className="card">
             <div className="card-header">
-              <h3 className="card-title">News Summary</h3>
+              <div className="flex items-center space-x-2">
+                <FireIcon className="h-5 w-5 text-orange-500" />
+                <h3 className="card-title">News Summary</h3>
+              </div>
             </div>
             
             <div className="space-y-3">

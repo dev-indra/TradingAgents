@@ -16,7 +16,7 @@ interface AssetAllocation {
 }
 
 export default function PortfolioAnalytics() {
-  const { assets, getTotalValue } = usePortfolio()
+  const { assets, getTotalValue, getTotalCost, getTotalGainLoss } = usePortfolio()
 
   if (assets.length === 0) {
     return (
@@ -32,7 +32,9 @@ export default function PortfolioAnalytics() {
   
   // Prepare data for charts
   const allocationData: AssetAllocation[] = assets.map((asset, index) => {
-    const value = asset.quantity * asset.averagePrice
+    // Use current price if available, fallback to average price
+    const currentPrice = asset.currentPrice || asset.averagePrice
+    const value = asset.quantity * currentPrice
     return {
       name: asset.name,
       symbol: asset.symbol,
@@ -42,29 +44,31 @@ export default function PortfolioAnalytics() {
     }
   }).sort((a, b) => b.value - a.value)
 
-  // Mock performance data (in real app, this would come from price API)
+  // Real performance data using live prices
   const performanceData = assets.map((asset, index) => {
-    const currentValue = asset.quantity * asset.averagePrice
-    // Mock current price change for demo
-    const mockPriceChange = (Math.random() - 0.5) * 0.2 // Random -10% to +10%
-    const currentPrice = asset.averagePrice * (1 + mockPriceChange)
-    const currentTotalValue = asset.quantity * currentPrice
-    const unrealizedPnL = currentTotalValue - currentValue
-    const percentChange = (unrealizedPnL / currentValue) * 100
+    const costBasis = asset.quantity * asset.averagePrice
+    // Use current price if available, fallback to average price
+    const currentPrice = asset.currentPrice || asset.averagePrice
+    const currentValue = asset.quantity * currentPrice
+    const unrealizedPnL = currentValue - costBasis
+    const percentChange = costBasis > 0 ? (unrealizedPnL / costBasis) * 100 : 0
 
     return {
       symbol: asset.symbol,
       name: asset.name,
-      value: currentValue,
-      currentValue: currentTotalValue,
+      value: costBasis,
+      currentValue: currentValue,
       unrealizedPnL,
       percentChange,
-      color: unrealizedPnL >= 0 ? '#22c55e' : '#ef4444'
+      color: unrealizedPnL >= 0 ? '#22c55e' : '#ef4444',
+      priceChange24h: asset.priceChange24h || 0,
+      currentPrice,
+      averagePrice: asset.averagePrice
     }
   })
 
-  const totalUnrealizedPnL = performanceData.reduce((sum, asset) => sum + asset.unrealizedPnL, 0)
-  const totalPercentChange = (totalUnrealizedPnL / totalValue) * 100
+  // Use real portfolio calculations from context
+  const { amount: totalUnrealizedPnL, percentage: totalPercentChange } = getTotalGainLoss()
 
   return (
     <div className="space-y-6">
@@ -213,7 +217,7 @@ export default function PortfolioAnalytics() {
                   Quantity
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Avg Price
+                  Avg / Current Price
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Value
@@ -250,7 +254,12 @@ export default function PortfolioAnalytics() {
                     {assets.find(a => a.symbol === asset.symbol)?.quantity.toLocaleString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${assets.find(a => a.symbol === asset.symbol)?.averagePrice.toLocaleString()}
+                    <div>${assets.find(a => a.symbol === asset.symbol)?.averagePrice.toLocaleString()}</div>
+                    {asset.currentPrice && asset.currentPrice !== asset.averagePrice && (
+                      <div className={`text-xs ${asset.currentPrice > asset.averagePrice ? 'text-success-600' : 'text-danger-600'}`}>
+                        ${asset.currentPrice.toLocaleString()} now
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     ${asset.value.toLocaleString()}

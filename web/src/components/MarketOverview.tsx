@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import useSWR from 'swr'
+import CryptoIcon from './CryptoIcon'
 
 interface Crypto {
   symbol: string
@@ -33,32 +34,84 @@ interface PriceData {
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
+// Special fetcher for batch market data that needs to POST symbols
+const batchMarketDataFetcher = async (url: string, symbols: string[]) => {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ symbols })
+  })
+  return response.json()
+}
+
 export default function MarketOverview({ cryptos, selectedCrypto, onCryptoSelect }: MarketOverviewProps) {
   const [marketData, setMarketData] = useState<Record<string, MarketData>>({})
   const [priceHistory, setPriceHistory] = useState<PriceData[]>([])
+  const [fearGreedIndex, setFearGreedIndex] = useState<{value: number, sentiment: string, description: string, color: string} | null>(null)
 
-  // Fetch market data for all cryptos
+  // Fetch real market data for all cryptos using CoinGecko API
+  const symbols = cryptos.map(c => c.symbol)
   const { data: marketResponse, error } = useSWR(
-    '/api/mcp-crypto/tools/get_crypto_market_data',
-    fetcher,
-    { refreshInterval: 30000 } // Refresh every 30 seconds
+    symbols.length > 0 ? ['/api/mcp-crypto/batch-market-data', symbols] : null,
+    ([url, symbols]) => batchMarketDataFetcher(url, symbols),
+    { 
+      refreshInterval: 60000, // Refresh every 60 seconds (CoinGecko rate limit friendly)
+      revalidateOnFocus: false
+    }
   )
 
   useEffect(() => {
-    if (marketResponse) {
-      // Process market data response
-      // This would need to be adapted based on the actual MCP response format
-      console.log('Market data response:', marketResponse)
+    if (marketResponse?.success && marketResponse.markets) {
+      // Transform the real data to our expected format
+      const transformedData: Record<string, MarketData> = {}
+      
+      Object.entries(marketResponse.markets).forEach(([symbol, data]: [string, any]) => {
+        transformedData[symbol] = {
+          symbol: data.symbol,
+          current_price: data.current_price || 0,
+          price_change_24h: data.price_change_24h || 0,
+          price_change_percentage_24h: data.price_change_percentage_24h || 0,
+          market_cap: data.market_cap || 0,
+          volume_24h: data.total_volume || 0
+        }
+      })
+      
+      setMarketData(transformedData)
+      console.log('✅ Real market data loaded:', transformedData)
+    } else if (marketResponse && !marketResponse.success) {
+      console.error('❌ Market data API error:', marketResponse)
     }
-  }, [marketResponse])
+    
+    if (error) {
+      console.error('❌ SWR fetch error:', error)
+    }
+  }, [marketResponse, error])
 
   useEffect(() => {
     fetchPriceHistory(selectedCrypto)
+    fetchFearGreedIndex()
   }, [selectedCrypto])
+
+  // Fetch Fear & Greed Index data
+  const fetchFearGreedIndex = async () => {
+    try {
+      const response = await fetch('/api/mcp-crypto/fear-greed-index')
+      const data = await response.json()
+      
+      if (data.success && data.index) {
+        setFearGreedIndex(data.index)
+        console.log('✅ Fear & Greed Index loaded:', data.index.value, data.index.sentiment)
+      } else {
+        console.error('❌ Fear & Greed Index API error:', data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch Fear & Greed Index:', error)
+    }
+  }
 
   const fetchPriceHistory = async (symbol: string) => {
     try {
-      const response = await fetch('/api/mcp-crypto/tools/get_crypto_price_data', {
+      const response = await fetch('/api/mcp-crypto/price-history', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ symbol, days: 7 })
@@ -66,12 +119,11 @@ export default function MarketOverview({ cryptos, selectedCrypto, onCryptoSelect
       
       const data = await response.json()
       
-      if (data.prices) {
-        const historyData = data.prices.map((price: [number, number]) => ({
-          timestamp: price[0],
-          price: price[1]
-        }))
-        setPriceHistory(historyData)
+      if (data.success && data.prices) {
+        setPriceHistory(data.prices)
+        console.log('✅ Price history loaded:', data.prices.length, 'data points')
+      } else {
+        console.error('❌ Price history API error:', data)
       }
     } catch (error) {
       console.error('Failed to fetch price history:', error)
@@ -150,7 +202,8 @@ export default function MarketOverview({ cryptos, selectedCrypto, onCryptoSelect
     price: 45000 + Math.sin(i / 10) * 2000 + Math.random() * 1000
   }))
 
-  const currentData = Object.keys(mockMarketData).length > 0 ? mockMarketData : marketData
+  // Use real data if available, fallback to mock data
+  const currentData = Object.keys(marketData).length > 0 ? marketData : mockMarketData
   const chartData = priceHistory.length > 0 ? priceHistory : mockPriceHistory
 
   return (
@@ -173,7 +226,12 @@ export default function MarketOverview({ cryptos, selectedCrypto, onCryptoSelect
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-2">
-                  <span className="text-2xl">{crypto.icon}</span>
+                  <CryptoIcon 
+                    symbol={crypto.symbol}
+                    name={crypto.name}
+                    iconUrl={crypto.icon}
+                    size="lg"
+                  />
                   <div>
                     <h3 className="font-semibold text-gray-900">{crypto.symbol}</h3>
                     <p className="text-xs text-gray-500">{crypto.name}</p>
@@ -309,24 +367,24 @@ export default function MarketOverview({ cryptos, selectedCrypto, onCryptoSelect
                     cx="64"
                     cy="64"
                     r="56"
-                    stroke="#0ea5e9"
+                    stroke={fearGreedIndex?.color || "#0ea5e9"}
                     strokeWidth="8"
                     fill="none"
                     strokeLinecap="round"
                     strokeDasharray={`${2 * Math.PI * 56}`}
-                    strokeDashoffset={`${2 * Math.PI * 56 * (1 - 0.65)}`}
+                    strokeDashoffset={`${2 * Math.PI * 56 * (1 - (fearGreedIndex?.value || 65) / 100)}`}
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">65</div>
-                    <div className="text-xs text-gray-500">Greed</div>
+                    <div className="text-2xl font-bold text-gray-900">{fearGreedIndex?.value || 65}</div>
+                    <div className="text-xs text-gray-500">{fearGreedIndex?.sentiment || 'Loading...'}</div>
                   </div>
                 </div>
               </div>
             </div>
             <p className="text-sm text-gray-600 text-center mt-2">
-              Market sentiment is positive
+              {fearGreedIndex?.description || 'Market sentiment data loading...'}
             </p>
           </div>
         </div>
@@ -344,7 +402,12 @@ export default function MarketOverview({ cryptos, selectedCrypto, onCryptoSelect
                 return (
                   <div key={symbol} className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <span className="text-lg">{crypto.icon}</span>
+                      <CryptoIcon 
+                        symbol={symbol}
+                        name={crypto.name}
+                        iconUrl={crypto.icon}
+                        size="md"
+                      />
                       <span className="font-medium text-gray-900">{symbol}</span>
                     </div>
                     <div className="text-success-600 font-medium text-sm">
@@ -369,7 +432,12 @@ export default function MarketOverview({ cryptos, selectedCrypto, onCryptoSelect
                 return (
                   <div key={symbol} className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <span className="text-lg">{crypto.icon}</span>
+                      <CryptoIcon 
+                        symbol={symbol}
+                        name={crypto.name}
+                        iconUrl={crypto.icon}
+                        size="md"
+                      />
                       <span className="font-medium text-gray-900">{symbol}</span>
                     </div>
                     <div className="text-gray-600 font-medium text-sm">

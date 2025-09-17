@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { PlusIcon, TrashIcon, PencilIcon, XMarkIcon, CheckIcon, ChartBarIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, TrashIcon, PencilIcon, XMarkIcon, CheckIcon, ChartBarIcon, ArrowUpIcon, ArrowDownIcon, ClockIcon } from '@heroicons/react/24/outline'
 import { usePortfolio, PortfolioAsset } from '@/context/PortfolioContext'
 import PortfolioAnalytics from './PortfolioAnalytics'
 import CryptoSearchSelector from './CryptoSearchSelector'
@@ -261,7 +261,7 @@ function EditAssetForm({ asset, onSave, onCancel }: EditAssetFormProps) {
 }
 
 export default function PortfolioManager() {
-  const { assets, addAsset, updateAsset, removeAsset, getTotalValue, isLoading } = usePortfolio()
+  const { assets, addAsset, updateAsset, removeAsset, getTotalValue, getTotalCost, getTotalGainLoss, refreshPrices, isLoading, isLoadingPrices, priceError, lastPriceUpdate } = usePortfolio()
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingAsset, setEditingAsset] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'manage' | 'analytics'>('manage')
@@ -290,6 +290,8 @@ export default function PortfolioManager() {
   }
 
   const totalValue = getTotalValue()
+  const totalCost = getTotalCost()
+  const { amount: totalGainLoss, percentage: totalGainLossPercent } = getTotalGainLoss()
 
   const tabs = [
     { id: 'manage', name: 'Manage Portfolio', icon: PlusIcon },
@@ -326,18 +328,65 @@ export default function PortfolioManager() {
           {/* Portfolio Summary */}
       <div className="bg-white p-4 rounded-lg border border-gray-200">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">My Portfolio</h2>
+          <div>
+            <div className="flex items-center space-x-3">
+              <h2 className="text-lg font-semibold text-gray-900">My Portfolio</h2>
+              <button
+                onClick={() => refreshPrices()}
+                disabled={isLoadingPrices}
+                className="p-1.5 text-gray-400 hover:text-crypto-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Refresh prices"
+              >
+                <ClockIcon className={`h-4 w-4 ${isLoadingPrices ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+          </div>
           <div className="text-right">
             <div className="text-2xl font-bold text-gray-900">
               ${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            <div className="text-sm text-gray-500">Total Value (Avg Cost)</div>
+            <div className="text-sm text-gray-500">Current Value</div>
+            {totalGainLoss !== 0 && (
+              <div className={`flex items-center justify-end text-sm mt-1 ${totalGainLoss >= 0 ? 'text-success-600' : 'text-danger-600'}`}>
+                {totalGainLoss >= 0 ? (
+                  <ArrowUpIcon className="h-3 w-3 mr-1" />
+                ) : (
+                  <ArrowDownIcon className="h-3 w-3 mr-1" />
+                )}
+                {totalGainLoss >= 0 ? '+' : ''}${totalGainLoss.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <span className="ml-1">({totalGainLossPercent >= 0 ? '+' : ''}{totalGainLossPercent.toFixed(2)}%)</span>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="text-sm text-gray-600 mb-4">
-          {assets.length} asset{assets.length !== 1 ? 's' : ''} • Last updated: {new Date().toLocaleDateString()}
+          {assets.length} asset{assets.length !== 1 ? 's' : ''} • 
+          {lastPriceUpdate ? (
+            `Prices updated: ${lastPriceUpdate.toLocaleTimeString()}`
+          ) : (
+            'Price data loading...'
+          )}
+          {isLoadingPrices && <span className="ml-2 text-crypto-600">Refreshing...</span>}
         </div>
+        
+        {/* Price Error Display */}
+        {priceError && (
+          <div className="bg-danger-50 border border-danger-200 rounded-md p-3 mb-4">
+            <div className="flex items-center">
+              <div className="text-danger-800 text-sm">
+                <strong>Price Update Failed:</strong> {priceError}
+              </div>
+              <button
+                onClick={() => refreshPrices()}
+                disabled={isLoadingPrices}
+                className="ml-auto text-sm text-danger-600 hover:text-danger-700 underline disabled:opacity-50"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Add Asset Button */}
         {!showAddForm && (
@@ -368,7 +417,11 @@ export default function PortfolioManager() {
         <div className="divide-y divide-gray-200">
           {assets.map((asset) => {
             const isEditing = editingAsset === asset.symbol
-            const value = asset.quantity * asset.averagePrice
+            const costBasis = asset.quantity * asset.averagePrice
+            const currentPrice = asset.currentPrice || asset.averagePrice
+            const currentValue = asset.quantity * currentPrice
+            const gainLoss = currentValue - costBasis
+            const gainLossPercent = costBasis > 0 ? (gainLoss / costBasis) * 100 : 0
 
             return (
               <div key={asset.symbol} className="p-4">
@@ -387,6 +440,16 @@ export default function PortfolioManager() {
                       </div>
                       {asset.notes && (
                         <div className="text-sm text-gray-500">{asset.notes}</div>
+                      )}
+                      {asset.priceChange24h && (
+                        <div className={`flex items-center text-xs mt-1 ${asset.priceChange24h >= 0 ? 'text-success-600' : 'text-danger-600'}`}>
+                          {asset.priceChange24h >= 0 ? (
+                            <ArrowUpIcon className="h-3 w-3 mr-1" />
+                          ) : (
+                            <ArrowDownIcon className="h-3 w-3 mr-1" />
+                          )}
+                          {asset.priceChange24h >= 0 ? '+' : ''}{asset.priceChange24h.toFixed(2)}% (24h)
+                        </div>
                       )}
                     </div>
                   </div>
@@ -407,14 +470,29 @@ export default function PortfolioManager() {
                           <div className="text-sm text-gray-500">
                             @ ${asset.averagePrice.toLocaleString()} avg
                           </div>
+                          {asset.currentPrice && asset.currentPrice !== asset.averagePrice && (
+                            <div className="text-xs text-crypto-600">
+                              ${asset.currentPrice.toLocaleString()} now
+                            </div>
+                          )}
                         </div>
                         <div className="text-right">
                           <div className="font-medium text-gray-900">
-                            ${value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                            ${currentValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {((value / totalValue) * 100).toFixed(1)}%
+                            {((currentValue / totalValue) * 100).toFixed(1)}%
                           </div>
+                          {gainLoss !== 0 && (
+                            <div className={`text-xs flex items-center justify-end ${gainLoss >= 0 ? 'text-success-600' : 'text-danger-600'}`}>
+                              {gainLoss >= 0 ? (
+                                <ArrowUpIcon className="h-3 w-3 mr-1" />
+                              ) : (
+                                <ArrowDownIcon className="h-3 w-3 mr-1" />
+                              )}
+                              {gainLoss >= 0 ? '+' : ''}${Math.abs(gainLoss).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                            </div>
+                          )}
                         </div>
                         <div className="flex space-x-1">
                           <button

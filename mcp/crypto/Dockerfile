@@ -13,7 +13,8 @@ RUN pip install --no-cache-dir \
     aiohttp \
     pandas \
     uvicorn \
-    python-dotenv
+    python-dotenv \
+    fastapi
 
 # Copy MCP server code
 COPY mcp/crypto/server.py .

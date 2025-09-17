@@ -567,10 +567,11 @@ class Toolkit:
         days: Annotated[int, "Number of days of data"] = 30,
     ) -> str:
         """
-        Fallback: Get crypto data directly from CoinGecko API
+        Fallback: Get crypto data directly from CoinGecko API with Redis caching
         """
-        # This would be implemented as a direct API call fallback
-        return f"CoinGecko data for {symbol} - {days} days (fallback implementation needed)"
+        from tradingagents.utils.crypto_fallback_tools import get_fallback_tools
+        fallback_tools = get_fallback_tools(self.config)
+        return fallback_tools.get_crypto_data_coingecko(symbol, days)
 
     @tool
     def get_crypto_data_binance(
@@ -578,10 +579,11 @@ class Toolkit:
         symbol: Annotated[str, "Cryptocurrency symbol (e.g., BTC, ETH)"],
     ) -> str:
         """
-        Fallback: Get crypto data directly from Binance API
+        Fallback: Get crypto data directly from Binance API with Redis caching
         """
-        # This would be implemented as a direct API call fallback
-        return f"Binance data for {symbol} (fallback implementation needed)"
+        from tradingagents.utils.crypto_fallback_tools import get_fallback_tools
+        fallback_tools = get_fallback_tools(self.config)
+        return fallback_tools.get_crypto_data_binance(symbol)
 
     @tool
     def get_crypto_news_rss(
@@ -589,7 +591,8 @@ class Toolkit:
         symbol: Annotated[str, "Cryptocurrency symbol (e.g., BTC, ETH)"],
     ) -> str:
         """
-        Fallback: Get crypto news from RSS feeds
+        Fallback: Get crypto news from RSS feeds with Redis caching
         """
-        # This would be implemented as RSS feed parsing fallback
-        return f"RSS news for {symbol} (fallback implementation needed)"
+        from tradingagents.utils.crypto_fallback_tools import get_fallback_tools
+        fallback_tools = get_fallback_tools(self.config)
+        return fallback_tools.get_crypto_news_rss(symbol)

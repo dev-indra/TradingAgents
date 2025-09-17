@@ -33,3 +33,7 @@ textblob
 python-dotenv
 ccxt
 binance-python
+
+# LM Studio local model integration
+openai>=1.0.0  # For OpenAI-compatible API client
+httpx  # Async HTTP client for better performance
