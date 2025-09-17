@@ -13,14 +13,11 @@ import re
 import aiohttp
 import feedparser
 from textblob import TextBlob
-from mcp.server.fastmcp import FastMCP
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize MCP server
-mcp = FastMCP("CryptoNewsServer")
 
 class CryptoNewsProvider:
     def __init__(self):
@@ -282,7 +279,6 @@ class CryptoNewsProvider:
 # Initialize global news provider
 news_provider = None
 
-@mcp.tool()
 async def get_crypto_news(symbol: str, days: int = 7) -> Dict[str, Any]:
     """
     Get news articles related to a cryptocurrency
@@ -301,7 +297,6 @@ async def get_crypto_news(symbol: str, days: int = 7) -> Dict[str, Any]:
     async with news_provider as provider:
         return await provider.get_crypto_news(symbol, days)
 
-@mcp.tool()
 async def get_crypto_social_sentiment(symbol: str) -> Dict[str, Any]:
     """
     Get social media sentiment for a cryptocurrency
@@ -319,7 +314,6 @@ async def get_crypto_social_sentiment(symbol: str) -> Dict[str, Any]:
     async with news_provider as provider:
         return await provider.get_social_sentiment(symbol)
 
-@mcp.tool()
 async def get_market_fear_greed_index() -> Dict[str, Any]:
     """
     Get the current crypto Fear & Greed index
@@ -334,7 +328,6 @@ async def get_market_fear_greed_index() -> Dict[str, Any]:
     async with news_provider as provider:
         return await provider.get_fear_greed_index()
 
-@mcp.tool()
 async def analyze_crypto_news_sentiment(symbol: str, days: int = 7) -> Dict[str, Any]:
     """
     Get comprehensive sentiment analysis combining news and social data
@@ -384,11 +377,27 @@ async def analyze_crypto_news_sentiment(symbol: str, days: int = 7) -> Dict[str,
         }
 
 if __name__ == "__main__":
-    # Create a simple HTTP wrapper around MCP server
-    from fastapi import FastAPI
+    # Create HTTP wrapper around MCP server with tool endpoints
+    from fastapi import FastAPI, HTTPException
+    from pydantic import BaseModel
     import uvicorn
     
     app = FastAPI()
+    
+    # Request models for tool endpoints
+    class NewsRequest(BaseModel):
+        symbol: str
+        days: int = 7
+    
+    class SentimentRequest(BaseModel):
+        symbol: str
+    
+    class FearGreedRequest(BaseModel):
+        pass
+    
+    class NewsSentimentRequest(BaseModel):
+        symbol: str
+        days: int = 7
     
     @app.get("/health")
     async def health_check():
@@ -397,6 +406,43 @@ if __name__ == "__main__":
     @app.get("/")
     async def root():
         return {"name": "CryptoNewsServer", "version": "1.0", "status": "running"}
+    
+    # MCP tool endpoints
+    @app.post("/tools/get_crypto_news")
+    async def http_get_crypto_news(request: NewsRequest):
+        try:
+            result = await get_crypto_news(request.symbol, request.days)
+            return result
+        except Exception as e:
+            logger.error(f"Error in get_crypto_news endpoint: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    @app.post("/tools/get_crypto_social_sentiment")
+    async def http_get_crypto_social_sentiment(request: SentimentRequest):
+        try:
+            result = await get_crypto_social_sentiment(request.symbol)
+            return result
+        except Exception as e:
+            logger.error(f"Error in get_crypto_social_sentiment endpoint: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    @app.post("/tools/get_market_fear_greed_index")
+    async def http_get_market_fear_greed_index():
+        try:
+            result = await get_market_fear_greed_index()
+            return result
+        except Exception as e:
+            logger.error(f"Error in get_market_fear_greed_index endpoint: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    @app.post("/tools/analyze_crypto_news_sentiment")
+    async def http_analyze_crypto_news_sentiment(request: NewsSentimentRequest):
+        try:
+            result = await analyze_crypto_news_sentiment(request.symbol, request.days)
+            return result
+        except Exception as e:
+            logger.error(f"Error in analyze_crypto_news_sentiment endpoint: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
     
     # Run the HTTP server
     uvicorn.run(app, host="0.0.0.0", port=9001)

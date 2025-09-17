@@ -11,14 +11,11 @@ import logging
 
 import aiohttp
 import pandas as pd
-from mcp.server.fastmcp import FastMCP
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize MCP server
-mcp = FastMCP("CryptoDataServer")
 
 class CryptoDataProvider:
     def __init__(self):
@@ -250,10 +247,9 @@ class CryptoDataProvider:
         }
         return symbol_to_id.get(symbol.upper(), symbol.lower())
 
-# Initialize global data provider
+# Initialize global crypto provider
 crypto_provider = None
 
-@mcp.tool()
 async def get_crypto_price_data(symbol: str, days: int = 30) -> Dict[str, Any]:
     """
     Get historical price data for a cryptocurrency
@@ -272,7 +268,6 @@ async def get_crypto_price_data(symbol: str, days: int = 30) -> Dict[str, Any]:
     async with crypto_provider as provider:
         return await provider.get_crypto_price_data(symbol, days)
 
-@mcp.tool()
 async def get_crypto_market_data(symbol: str) -> Dict[str, Any]:
     """
     Get current market data for a cryptocurrency
@@ -290,7 +285,6 @@ async def get_crypto_market_data(symbol: str) -> Dict[str, Any]:
     async with crypto_provider as provider:
         return await provider.get_crypto_market_data(symbol)
 
-@mcp.tool()
 async def get_crypto_orderbook(symbol: str) -> Dict[str, Any]:
     """
     Get order book data for a cryptocurrency from Binance
@@ -308,7 +302,6 @@ async def get_crypto_orderbook(symbol: str) -> Dict[str, Any]:
     async with crypto_provider as provider:
         return await provider.get_binance_orderbook(symbol)
 
-@mcp.tool()
 async def get_binance_market_data(symbol: str) -> Dict[str, Any]:
     """
     Get real-time market data from Binance (more accurate than CoinGecko)
@@ -326,7 +319,6 @@ async def get_binance_market_data(symbol: str) -> Dict[str, Any]:
     async with crypto_provider as provider:
         return await provider.get_binance_market_data(symbol)
 
-@mcp.tool()
 async def get_batch_market_data(symbols: str) -> Dict[str, Any]:
     """
     Get market data for multiple cryptocurrencies at once
@@ -345,7 +337,6 @@ async def get_batch_market_data(symbols: str) -> Dict[str, Any]:
     async with crypto_provider as provider:
         return await provider.get_batch_market_data(symbol_list)
 
-@mcp.tool()
 async def calculate_crypto_indicators(symbol: str, days: int = 30) -> Dict[str, Any]:
     """
     Calculate technical indicators for a cryptocurrency
@@ -403,11 +394,30 @@ async def calculate_crypto_indicators(symbol: str, days: int = 30) -> Dict[str, 
         }
 
 if __name__ == "__main__":
-    # Create a simple HTTP wrapper around MCP server
-    from fastapi import FastAPI
+    # Create HTTP wrapper around MCP server with tool endpoints
+    from fastapi import FastAPI, HTTPException
+    from pydantic import BaseModel
     import uvicorn
     
     app = FastAPI()
+    
+    # Request models for tool endpoints
+    class PriceDataRequest(BaseModel):
+        symbol: str
+        days: int = 30
+    
+    class MarketDataRequest(BaseModel):
+        symbol: str
+    
+    class OrderbookRequest(BaseModel):
+        symbol: str
+    
+    class BatchMarketDataRequest(BaseModel):
+        symbols: str
+    
+    class IndicatorsRequest(BaseModel):
+        symbol: str
+        days: int = 30
     
     @app.get("/health")
     async def health_check():
@@ -416,6 +426,61 @@ if __name__ == "__main__":
     @app.get("/")
     async def root():
         return {"name": "CryptoDataServer", "version": "1.0", "status": "running"}
+    
+    # MCP tool endpoints
+    @app.post("/tools/get_crypto_price_data")
+    async def http_get_crypto_price_data(request: PriceDataRequest):
+        try:
+            result = await get_crypto_price_data(request.symbol, request.days)
+            return result
+        except Exception as e:
+            logger.error(f"Error in get_crypto_price_data endpoint: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    @app.post("/tools/get_crypto_market_data")
+    async def http_get_crypto_market_data(request: MarketDataRequest):
+        try:
+            result = await get_crypto_market_data(request.symbol)
+            return result
+        except Exception as e:
+            logger.error(f"Error in get_crypto_market_data endpoint: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    @app.post("/tools/get_crypto_orderbook")
+    async def http_get_crypto_orderbook(request: OrderbookRequest):
+        try:
+            result = await get_crypto_orderbook(request.symbol)
+            return result
+        except Exception as e:
+            logger.error(f"Error in get_crypto_orderbook endpoint: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    @app.post("/tools/get_binance_market_data")
+    async def http_get_binance_market_data(request: MarketDataRequest):
+        try:
+            result = await get_binance_market_data(request.symbol)
+            return result
+        except Exception as e:
+            logger.error(f"Error in get_binance_market_data endpoint: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    @app.post("/tools/get_batch_market_data")
+    async def http_get_batch_market_data(request: BatchMarketDataRequest):
+        try:
+            result = await get_batch_market_data(request.symbols)
+            return result
+        except Exception as e:
+            logger.error(f"Error in get_batch_market_data endpoint: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    @app.post("/tools/calculate_crypto_indicators")
+    async def http_calculate_crypto_indicators(request: IndicatorsRequest):
+        try:
+            result = await calculate_crypto_indicators(request.symbol, request.days)
+            return result
+        except Exception as e:
+            logger.error(f"Error in calculate_crypto_indicators endpoint: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
     
     # Run the HTTP server
     uvicorn.run(app, host="0.0.0.0", port=9000)

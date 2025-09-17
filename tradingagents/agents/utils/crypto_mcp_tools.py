@@ -97,7 +97,6 @@ def get_mcp_client(config: Dict[str, Any]) -> MCPCryptoClient:
         mcp_client = MCPCryptoClient(config)
     return mcp_client
 
-@tool
 async def get_crypto_price_data_mcp(symbol: str, days: int = 30, config: Optional[Dict[str, Any]] = None) -> str:
     """
     Get historical price data for a cryptocurrency via MCP server
@@ -122,7 +121,6 @@ async def get_crypto_price_data_mcp(symbol: str, days: int = 30, config: Optiona
         )
         return json.dumps(result, indent=2)
 
-@tool
 async def get_crypto_market_data_mcp(symbol: str, config: Optional[Dict[str, Any]] = None) -> str:
     """
     Get current market data for a cryptocurrency via MCP server
@@ -146,7 +144,6 @@ async def get_crypto_market_data_mcp(symbol: str, config: Optional[Dict[str, Any
         )
         return json.dumps(result, indent=2)
 
-@tool
 async def get_crypto_orderbook_mcp(symbol: str, config: Optional[Dict[str, Any]] = None) -> str:
     """
     Get order book data for a cryptocurrency via MCP server
@@ -170,7 +167,6 @@ async def get_crypto_orderbook_mcp(symbol: str, config: Optional[Dict[str, Any]]
         )
         return json.dumps(result, indent=2)
 
-@tool
 async def calculate_crypto_indicators_mcp(symbol: str, days: int = 30, config: Optional[Dict[str, Any]] = None) -> str:
     """
     Calculate technical indicators for a cryptocurrency via MCP server
@@ -195,7 +191,6 @@ async def calculate_crypto_indicators_mcp(symbol: str, days: int = 30, config: O
         )
         return json.dumps(result, indent=2)
 
-@tool
 async def get_crypto_news_mcp(symbol: str, days: int = 7, config: Optional[Dict[str, Any]] = None) -> str:
     """
     Get news articles related to a cryptocurrency via MCP server
@@ -220,7 +215,6 @@ async def get_crypto_news_mcp(symbol: str, days: int = 7, config: Optional[Dict[
         )
         return json.dumps(result, indent=2)
 
-@tool
 async def get_crypto_social_sentiment_mcp(symbol: str, config: Optional[Dict[str, Any]] = None) -> str:
     """
     Get social media sentiment for a cryptocurrency via MCP server
@@ -244,7 +238,6 @@ async def get_crypto_social_sentiment_mcp(symbol: str, config: Optional[Dict[str
         )
         return json.dumps(result, indent=2)
 
-@tool
 async def get_market_fear_greed_index_mcp(config: Optional[Dict[str, Any]] = None) -> str:
     """
     Get the current crypto Fear & Greed index via MCP server
@@ -267,7 +260,6 @@ async def get_market_fear_greed_index_mcp(config: Optional[Dict[str, Any]] = Non
         )
         return json.dumps(result, indent=2)
 
-@tool
 async def analyze_crypto_news_sentiment_mcp(symbol: str, days: int = 7, config: Optional[Dict[str, Any]] = None) -> str:
     """
     Get comprehensive sentiment analysis combining news and social data via MCP server
